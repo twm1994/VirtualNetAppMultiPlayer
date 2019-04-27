@@ -1,0 +1,80 @@
+22.5 cycleStart < 0
+22.5 cycleStart < 0
+22.5 cycleStart < 0
+22.5 cycleStart < 0
+22.5 cycleStart < 0
+30 node[0] LCName: client[0]-LC
+node[0] sent LCName: client[0]-LC
+node[0] clientId: 65513 after update
+30 node[1] LCName: client[0]-LC
+node[1] sent LCName: client[0]-LC
+node[1] clientId: 65513 after update
+30 node[2] LCName: client[0]-LC
+node[2] sent LCName: client[0]-LC
+node[2] clientId: 65513 after update
+30 node[3] LCName: client[0]-LC
+node[3] sent LCName: client[0]-LC
+node[3] clientId: 65513 after update
+30 node[4] LCName: client[0]-LC
+node[4] sent LCName: client[0]-LC
+node[4] clientId: 65513 after update
+30 node[0] LCName: client[0]-LC
+node[0] sent LCName: client[0]-LC
+node[0] clientId: 65513 after update
+30 node[1] LCName: client[0]-LC
+node[1] sent LCName: client[0]-LC
+node[1] clientId: 65513 after update
+30 node[2] LCName: client[0]-LC
+node[2] sent LCName: client[0]-LC
+node[2] clientId: 65513 after update
+30 node[3] LCName: client[0]-LC
+node[3] sent LCName: client[0]-LC
+node[3] clientId: 65513 after update
+30 node[4] LCName: client[0]-LC
+node[4] sent LCName: client[0]-LC
+node[4] clientId: 65513 after update
+30 node[0] LCName: client[0]-LC
+node[0] sent LCName: client[0]-LC
+node[0] clientId: 65513 after update
+30 node[1] LCName: client[0]-LC
+node[1] sent LCName: client[0]-LC
+node[1] clientId: 65513 after update
+30 node[2] LCName: client[0]-LC
+node[2] sent LCName: client[0]-LC
+node[2] clientId: 65513 after update
+30 node[3] LCName: client[0]-LC
+node[3] sent LCName: client[0]-LC
+node[3] clientId: 65513 after update
+30 node[4] LCName: client[0]-LC
+node[4] sent LCName: client[0]-LC
+node[4] clientId: 65513 after update
+30 node[0] LCName: client[0]-LC
+node[0] sent LCName: client[0]-LC
+node[0] clientId: 65513 after update
+30 node[1] LCName: client[0]-LC
+node[1] sent LCName: client[0]-LC
+node[1] clientId: 65513 after update
+30 node[2] LCName: client[0]-LC
+node[2] sent LCName: client[0]-LC
+node[2] clientId: 65513 after update
+30 node[3] LCName: client[0]-LC
+node[3] sent LCName: client[0]-LC
+node[3] clientId: 65513 after update
+30 node[4] LCName: client[0]-LC
+node[4] sent LCName: client[0]-LC
+node[4] clientId: 65513 after update
+30 node[0] LCName: client[0]-LC
+node[0] sent LCName: client[0]-LC
+node[0] clientId: 65513 after update
+30 node[1] LCName: client[0]-LC
+node[1] sent LCName: client[0]-LC
+node[1] clientId: 65513 after update
+30 node[2] LCName: client[0]-LC
+node[2] sent LCName: client[0]-LC
+node[2] clientId: 65513 after update
+30 node[3] LCName: client[0]-LC
+node[3] sent LCName: client[0]-LC
+node[3] clientId: 65513 after update
+30 node[4] LCName: client[0]-LC
+node[4] sent LCName: client[0]-LC
+node[4] clientId: 65513 after update
