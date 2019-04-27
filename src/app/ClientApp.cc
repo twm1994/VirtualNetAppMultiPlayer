@@ -23,9 +23,6 @@ Define_Module(ClientApp);
 std::ofstream dfile_ca("VirtualNet_ClientApp.txt");
 std::ostream dout_ca(dfile_ca.rdbuf());
 
-/*
- *
- */
 ClientApp::ClientApp() :
         m_con(PROTOCOL_ID, 512) {
     STAGE_NUM = stage::CLIENT_INIT;
