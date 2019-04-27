@@ -1,0 +1,6 @@
+backup
+out
+simulations/results
+simulations/*.txt
+src/.tmp*
+src/*.exe
