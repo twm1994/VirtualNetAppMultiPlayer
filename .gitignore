@@ -2,5 +2,8 @@ backup
 out
 simulations/results
 simulations/*.txt
+simulatoins/.cmdenv-log
+simulatoins/.qtenvrc
+simulatoins/.qtenvrc.X*
 src/.tmp*
 src/*.exe
