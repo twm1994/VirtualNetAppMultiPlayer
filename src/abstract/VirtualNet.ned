@@ -25,7 +25,7 @@ network VirtualNet
         @display("bgb=1080,720;");
         @statistic[InteractionLatency](source=latency; title="Interaction Latency"; record=stats);
         @statistic[DeliveryQueueLength](source=QdLength; title="Delivery queue length"; record=stats);
-        int client_num = default(1);
+        int npc_num = default(1);
         double pktLossRate;
         double Copt @unit(mps);
         double BW @unit(bps);
@@ -51,11 +51,11 @@ network VirtualNet
         //        churnGenerator: UniformChurnGenerator {
         //            @display("p=100,500;t=Churn Generator");
         //        }
-        churnGenerator: WeibullChurnGenerator {
+        //        churnGenerator: WeibullChurnGenerator {
+        //            @display("p=100,500;t=Churn Generator");
+        //        }
+        churnGenerator: ManualChurnGenerator {
             @display("p=100,500;t=Churn Generator");
         }
-    //        churnGenerator: ManualChurnGenerator {
-    //            @display("p=100,500;t=Churn Generator");
-    //        }
     connections allowunconnected:
 }

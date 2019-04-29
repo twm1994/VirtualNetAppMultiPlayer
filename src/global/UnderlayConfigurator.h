@@ -61,7 +61,7 @@ public:
     void revokeNode(IPvXAddress& nodeAddr, bool toRemoveNode = false);
     // schedule to remove a Mesh
     void revokeLogicComputer(IPvXAddress& nodeAddr);
-    void revokeClient(IPvXAddress& nodeAddr);
+    void revokeClient(IPvXAddress nodeAddr);
     void disposeFailures();
 protected:
     /**
@@ -105,6 +105,7 @@ private:
     void handleNodeFailure(Failure* failure);
     void handleClientLogin(cMessage* msg);
     void initChordOverlay(cMessage* msg);
+    void handleNPCInit(cMessage* msg);
 };
 
 #endif

@@ -239,7 +239,7 @@ void NodeCtrl::dispatchHandler(cMessage *msg) {
         send(msg, this->gateHalf("uplink", cGate::OUTPUT));
     } else if (msg->isName(msg::TERMINATION)) {
         toExit = true;
-        if (is_hbto || is_ccto) {
+        if (is_hbto) {
             UnderlayConfiguratorAccess().get()->revokeNode(ipAddress);
         } else {
             sendReliable(msg);
@@ -643,10 +643,17 @@ void NodeCtrl::collectRoundEvents() {
                 dout << fullName << " failed to receive a client event" << endl;
 
                 if (!suspect_client) {
+
+                    cout << "fullName" << " start to suspect the client" << endl;
+
                     suspect_client = true;
                     suspectStart = simTime();
                 } else {
                     simtime_t suspectDuration = simTime() - suspectStart;
+
+                    cout << "fullName" << " suspectDuration: " << suspectDuration << endl;
+                    cout << "fullName" << " client_interruption: " << client_interruption << endl;
+
                     if (suspectDuration > client_interruption) {
                         // start to terminate
                         receiveClient = false;

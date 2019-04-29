@@ -139,11 +139,11 @@ void NPC::randomWalk(f32 dtime, Map &map) {
     }
     int b_walk = rand() % 2;
     if (b_walk) {
-        speed.X = m_speed_vector.X;
+        speed.X = m_speed_vector.X / 4;
         //if ((rand() % 8 == 0) && touching_ground) {
         //	speed.Y += 3 * BS;
         //}
-        speed.Z = m_speed_vector.Z;
+        speed.Z = m_speed_vector.Z / 4;
         move(dtime, map);
     }
     m_step_counter = m_step_counter + 1;

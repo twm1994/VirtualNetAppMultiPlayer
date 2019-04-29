@@ -136,7 +136,8 @@ void ClientApp::Receive() {
             } else if (checkCollapse(*data, datasize)) {
                 // collapse the client
                 ctrl->toExit = true;
-                UnderlayConfiguratorAccess().get()->revokeClient(ipAddress);
+                UnderlayConfiguratorAccess().get()->revokeClient(
+                        ctrl->getIPAddress());
                 return;
             }
 

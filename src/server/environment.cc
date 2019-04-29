@@ -92,8 +92,10 @@ void Environment::step(float dtime) {
         if (m_npc) {
             // initial vertical position
             m_npc->speed.Y -= 9.81 * BS * dtime_part * 2;
+            m_npc->randomWalk(dtime_part, *m_map);
             m_npc->move(dtime_part, *m_map);
         }
+
     } while (dtime > 0.001);
 
 }

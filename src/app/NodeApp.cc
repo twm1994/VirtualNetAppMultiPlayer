@@ -544,20 +544,22 @@ std::string NodeApp::processData(u8 *data, u32 datasize, u16 peerId,
             player->setRotation(rotation);
 
             // update state only if there is any state change
-            float x = position.X;
-            float y = position.Y;
-            float z = position.Z;
-            unsigned short s = readU16(&data[2 + 12 + 12 + 12]);
-            unsigned short g = readU16(&data[2 + 12 + 12 + 12 + 2]);
-            if (this->position[0] != x || this->position[1] != y
-                    || this->position[2] != z || skin != s || gear != g) {
-                version++;
+            if (player->isLocal()) {
+                float x = position.X;
+                float y = position.Y;
+                float z = position.Z;
+                unsigned short s = readU16(&data[2 + 12 + 12 + 12]);
+                unsigned short g = readU16(&data[2 + 12 + 12 + 12 + 2]);
+                if (this->position[0] != x || this->position[1] != y
+                        || this->position[2] != z || skin != s || gear != g) {
+                    version++;
 
-                this->position[0] = x;
-                this->position[1] = y;
-                this->position[2] = z;
-                skin = s;
-                gear = g;
+                    this->position[0] = x;
+                    this->position[1] = y;
+                    this->position[2] = z;
+                    skin = s;
+                    gear = g;
+                }
             }
 
             // generate the player position update command

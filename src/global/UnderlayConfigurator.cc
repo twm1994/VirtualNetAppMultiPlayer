@@ -75,6 +75,10 @@ void UnderlayConfigurator::initialize(int stage) {
     cMessage* clientInit = new cMessage(msg::INIT_CHORD);
     scheduleAt(0, clientInit);
     scheduleAt(simTime() + loginLoop, loginMsg);
+
+    // initialize clients
+    cMessage* npcInit = new cMessage(msg::NPC_INIT);
+    scheduleAt(0, npcInit);
 }
 
 void UnderlayConfigurator::finish() {
@@ -92,6 +96,8 @@ void UnderlayConfigurator::handleMessage(cMessage* msg) {
         removeHost(t);
     } else if (msg->isName(msg::INIT_CHORD)) {
         initChordOverlay(msg);
+    } else if (msg->isName(msg::NPC_INIT)) {
+        handleNPCInit(msg);
     }
 }
 
@@ -261,6 +267,36 @@ void UnderlayConfigurator::handleClientLogin(cMessage* msg) {
         ;
     }
     scheduleAt(simTime() + loginLoop, loginMsg);
+}
+
+void UnderlayConfigurator::handleNPCInit(cMessage* msg) {
+    // create NPCs
+    int neighborNum = getSimulation()->getModuleByPath("VirtualNet")->par(
+            "npc_num");
+    const char* neighborType = par("npcType");
+    const char* neighborName = par("npcName");
+    for (int i = 0; i < neighborNum; i++) {
+        // create a new neighbor
+        cModuleType* moduleType = cModuleType::get(neighborType);
+        cModule* parent = getParentModule();
+        // create (possibly compound) module and build its submodules (if any)
+        cModule* neighbor = moduleType->create(neighborName, parent,
+                neighborCreated + 1, neighborCreated);
+        neighborCreated++;
+        // set up parameters, if any
+        neighbor->finalizeParameters();
+        neighbor->buildInside();
+        // create activation message
+        neighbor->scheduleStart(simTime());
+        neighbor->callInitialize(0);
+        neighbor->callInitialize(1);
+        // initialize the client location
+        ClientInfo info = coordinator->getClientInfo(neighbor->getFullName());
+        neighbor->getDisplayString().setTagArg("p", 0, info.getX());
+        neighbor->getDisplayString().setTagArg("p", 1, info.getY());
+    }
+
+    delete msg;
 }
 
 TransportAddress* UnderlayConfigurator::createLogicComputer() {
@@ -443,7 +479,7 @@ void UnderlayConfigurator::revokeLogicComputer(IPvXAddress& nodeAddr) {
     parameterList->remoteHost(nodeAddr);
 }
 
-void UnderlayConfigurator::revokeClient(IPvXAddress& nodeAddr) {
+void UnderlayConfigurator::revokeClient(IPvXAddress nodeAddr) {
     Enter_Method_Silent("Revoke a client");
 
     SimpleInfo* info = dynamic_cast<SimpleInfo*>(globalNodeList->getPeerInfo(

@@ -41,6 +41,7 @@ OBJS = \
     $O/crypto/sha1.o \
     $O/ctrl/ChordCtrl.o \
     $O/ctrl/ClientCtrl.o \
+    $O/ctrl/ClientMeshCtrl.o \
     $O/ctrl/NodeCtrl.o \
     $O/ctrl/Rendezvous.o \
     $O/global/ChurnGenerator.o \
