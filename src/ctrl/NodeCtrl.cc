@@ -292,9 +292,6 @@ void NodeCtrl::handleHeartbeat(HBProbe *hb) {
         simtime_t starttime = hb->getStartTime();
         initNode(starttime);
     }
-//    if(){
-//
-//    }
 
 // send heartbeat response
     HBResponse* hbr = new HBResponse(msg::HEARTBEAT_RESPONSE);
