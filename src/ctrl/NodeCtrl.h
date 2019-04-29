@@ -189,7 +189,6 @@ private:
      * in tuple (recipient/recipient group ID, recipient(s) address (address, name))
      */
     map<unsigned long, map<string, string> > Rg;
-    bool receiveClient;
 
     /*
      * Data structures for event sequence ordering
@@ -364,6 +363,7 @@ public:
         EH, GR, CC, DORMANT
     };
     Mode mode;
+    bool receiveClient;
 
     NodeCtrl();
     virtual ~NodeCtrl();
