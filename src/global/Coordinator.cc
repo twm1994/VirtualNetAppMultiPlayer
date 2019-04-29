@@ -160,7 +160,10 @@ void Coordinator::updatePosition(string clientName, long x, long y,
         clients[clientName].setY(y);
     }
 
-//    ClientInfo caller = clients[clientName];
+    // to simplify simulation, only NPCs initialize communication
+    if(clientName.find("NPC") < clientName.length()) {
+        return;
+    }
 
 // search neighbors
     for (map<string, ClientInfo>::iterator it = clients.begin();
