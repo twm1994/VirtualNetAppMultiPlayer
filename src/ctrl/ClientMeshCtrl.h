@@ -17,19 +17,18 @@
 #define __VIRTUALNETAPP_CLIENTMESHCTRL_H_
 
 #include <omnetpp.h>
-
 #include "../server/environment.h"
 #include "../server/utility.h"
 #include "../server/clientserver.h"
 #include "../server/map.h"
 #include "../server/npc.h"
-
 #include "../common/HostBase.h"
 #include "../common/sdbm.h"
 #include "../common/PearsonHash.h"
 #include "../common/Util.h"
 #include "../global/UnderlayConfiguratorAccess.h"
 #include "../global/CoordinatorAccess.h"
+#include "../objects/Coordinate.h"
 #include "../messages/AddNeighbor_m.h"
 #include "../messages/RemoveNeighbor_m.h"
 #include "../messages/HandShakeTimeout_m.h"
@@ -57,9 +56,10 @@ private:
 
     // replicas of the neighbor users' logical computer, in (logical_computer_name, replica_address)
     multimap<string, IPvXAddress> replicaMaps;
+    set<IPvXAddress> meshReplicas;
     multimap<string, IPvXAddress> neighborMaps;
     std::string LCName;
-
+    set<std::string> neighbors;
     std::map<std::string, IPvXAddress> rendezvousMaps;
 
     set<string> neighborsToAdd;
@@ -68,6 +68,7 @@ private:
     // time related variables
     // length of a round
     simtime_t cycle;
+    cMessage* updatePosition;
 
     map<string, ClientCycleTimeout*> timeouts;
     // (logical computer (name), start time)
@@ -85,7 +86,8 @@ private:
     void handleHandShakeTimeout(cMessage* msg);
     void handleJoin(cMessage* msg);
     void handleCycleEvent(cMessage* msg);
-    string updatePlayerPosition();
+    string getPlayerPosition();
+    void updatePlayerPosition(cMessage* msg);
     void displayPosition(long x, long y);
     void handleConfigUpdate(cMessage* msg);
     void initMap(v3f position);

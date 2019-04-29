@@ -195,14 +195,14 @@ void Coordinator::updatePosition(string clientName, long x, long y,
                 }
                 string addrs = sstream.str();
 
-                cout << "addrs: " << addrs << endl;
+//                cout << "addrs: " << addrs << endl;
 
                 addNeighbor->setHostAddrs(addrs.c_str());
-                // add control information
+// add control information
                 UDPControlInfo* udpControlInfo = new UDPControlInfo();
                 udpControlInfo->setDestAddr(client.getRendezvous());
 
-                cout << "neighbor address: " << client.getRendezvous() << endl;
+//                cout << "neighbor address: " << client.getRendezvous() << endl;
 
                 addNeighbor->setControlInfo(udpControlInfo);
                 sendFixedDelay(addNeighbor);

@@ -23,13 +23,16 @@ ClientMeshCtrl::ClientMeshCtrl() :
         m_env(new MasterMap(), std::cout) {
     STAGE_NUM = 2;
     // NPC simulation step interval
-    cycle = 0.2;
+    cycle = 1.0;
     skin = 99;
     gear = 0;
+    updatePosition = NULL;
 }
 
 ClientMeshCtrl::~ClientMeshCtrl() {
-    ;
+    if (updatePosition != NULL) {
+        cancelAndDelete(updatePosition);
+    }
 }
 
 int ClientMeshCtrl::numInitStages() const {
@@ -40,6 +43,7 @@ void ClientMeshCtrl::initialize(int stage) {
     if (stage == 0) {
         HostBase::initialize();
         fullName = getParentModule()->getFullName();
+        LCName = fullName;
         peerId = pearsonHash16(fullName);
         // initialize node ID
 //        id = sdbm::encode(fullName);
@@ -53,6 +57,9 @@ void ClientMeshCtrl::initialize(int stage) {
         WATCH_SET(neighborsToAdd);
         WATCH_SET(neighborsToRemove);
         WATCH_MULTIMAP(replicaMaps);
+        WATCH_MULTIMAP(neighborMaps);
+        WATCH_SET(neighbors);
+        WATCH(LCName);
     }
 
     if (stage == 1) {
@@ -87,6 +94,9 @@ void ClientMeshCtrl::initialize(int stage) {
 
         cout << "NPC position: " << npc->getPosition().X << ", "
                 << npc->getPosition().Y << ", " << npc->getPosition().Z << endl;
+
+        updatePosition = new cMessage(msg::NPC_UPDATE_POS);
+        scheduleAt(simTime() + cycle, updatePosition);
     }
 }
 
@@ -141,7 +151,7 @@ void ClientMeshCtrl::dispatchHandler(cMessage *msg) {
         handleAddNeighbor(msg);
     } else if (msg->isName(msg::NEIGHBOR_RM)) {
         handleRMNeighbor(msg);
-    } else if (msg->isName(msg::CONNECT_TIMEOUT)) {
+    } else if (msg->isName(msg::HANDSHAKE_TIMEOUT)) {
         handleHandShakeTimeout(msg);
     } else if (msg->isName(msg::JOIN)) {
         handleJoin(msg);
@@ -154,6 +164,8 @@ void ClientMeshCtrl::dispatchHandler(cMessage *msg) {
         handleHandShakeReject(msg);
     } else if (msg->isName(msg::CONFIG_UPDATE)) {
         handleConfigUpdate(msg);
+    } else if (msg->isName(msg::NPC_UPDATE_POS)) {
+        updatePlayerPosition(msg);
     }
 }
 
@@ -183,6 +195,7 @@ void ClientMeshCtrl::handleAddNeighbor(cMessage* msg) {
             seq[LCName] = 0;
             neighborsToAdd.insert(LCName);
             neighborsToRemove.erase(LCName);
+            neighbors.insert(LCName);
         }
 
         HandShakeTimeout* hsTimeout = new HandShakeTimeout(
@@ -329,7 +342,7 @@ void ClientMeshCtrl::handleCycleEvent(cMessage* msg) {
     em->setSenderId(id);
     stringstream ss;
 
-    string event = updatePlayerPosition();
+    string event = getPlayerPosition();
     if (neighborsToRemove.count(LCName) > 0) {
         event = string(event::TO_REMOVE) + "+" + to_string(peerId) + "+"
                 + fullName + "+" + to_string(id);
@@ -362,6 +375,7 @@ void ClientMeshCtrl::handleCycleEvent(cMessage* msg) {
         seq.erase(LCName);
         delete cycleTimeout;
         timeouts.erase(LCName);
+        neighbors.erase(LCName);
     } else {
         // Set the timer for sending the next event
         scheduleAt(simTime() + cycle, cycleTimeout);
@@ -370,16 +384,14 @@ void ClientMeshCtrl::handleCycleEvent(cMessage* msg) {
     }
 }
 
-string ClientMeshCtrl::updatePlayerPosition() {
+string ClientMeshCtrl::getPlayerPosition() {
 
-    // update simulation first
-    m_env.step(cycle.dbl());
     NPC* npc = m_env.getNPC();
     v3f pf = npc->getPosition();
     v3f rf = npc->getRotation();
     v3f sf = npc->speed;
 
-    cout << "NPC position: " << pf.X << ", " << pf.Y << ", " << pf.Z << endl;
+//    cout << "NPC position: " << pf.X << ", " << pf.Y << ", " << pf.Z << endl;
 
     v3s32 position(pf.X * 100, pf.Y * 100, pf.Z * 100);
     v3s32 speed(sf.X * 100, sf.Y * 100, sf.Z * 100);
@@ -404,15 +416,24 @@ string ClientMeshCtrl::updatePlayerPosition() {
     string event = encoded + "+" + to_string(datasize) + "+" + to_string(peerId)
             + "+" + fullName + "+" + to_string(id);
 
-    // update coordinator record and map position
-    Coordinate position((long) ps.X / 100, (long) ps.Z / 100);
-    CoordinatorAccess().get()->mapLocation(position);
-    displayPosition(c.x, c.y);
-    CoordinatorAccess().get()->updatePosition(fullName, c.x, c.y,
-            ctrl->getIPAddress(), ctrl->getLCName(), neighbors,
-            ctrl->getMeshReplicas());
-
     return event;
+}
+
+void ClientMeshCtrl::updatePlayerPosition(cMessage* msg) {
+    // update simulation first
+    m_env.step(cycle.dbl());
+
+    // update coordinator record and map position
+    NPC* npc = m_env.getNPC();
+    v3f pf = npc->getPosition();
+    v3s32 position(pf.X * 100, pf.Y * 100, pf.Z * 100);
+    Coordinate ps((long) position.X / 100, (long) position.Z / 100);
+    Coordinate c = CoordinatorAccess().get()->mapLocation(ps);
+    displayPosition(c.x, c.y);
+    CoordinatorAccess().get()->updatePosition(fullName, c.x, c.y, ipAddress,
+            LCName, neighbors, meshReplicas);
+
+    scheduleAt(simTime() + cycle, updatePosition);
 }
 
 void ClientMeshCtrl::displayPosition(long x, long y) {

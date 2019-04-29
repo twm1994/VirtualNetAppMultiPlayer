@@ -113,6 +113,7 @@ const char* msg::EVENT_TIMEOUT = "EVENT_TIMEOUT";
 const char* msg::GC_TIMEOUT = "GC_TIMEOUT";
 const char* msg::CLIENT_INIT = "CLIENT_INIT";
 const char* msg::NPC_INIT = "NPC_INIT";
+const char* msg::NPC_UPDATE_POS = "NPC_UPDATE_POS";
 const char* msg::NEIGHBOR_DISCOVERY = "NEIGHBOR_DISCOVERY";
 //const char* msg::STEP_APP = "STEP_APP";
 

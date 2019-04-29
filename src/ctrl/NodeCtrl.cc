@@ -644,15 +644,18 @@ void NodeCtrl::collectRoundEvents() {
 
                 if (!suspect_client) {
 
-                    cout << "fullName" << " start to suspect the client" << endl;
+                    cout << "fullName" << " start to suspect the client"
+                            << endl;
 
                     suspect_client = true;
                     suspectStart = simTime();
                 } else {
                     simtime_t suspectDuration = simTime() - suspectStart;
 
-                    cout << "fullName" << " suspectDuration: " << suspectDuration << endl;
-                    cout << "fullName" << " client_interruption: " << client_interruption << endl;
+                    cout << "fullName" << " suspectDuration: "
+                            << suspectDuration << endl;
+                    cout << "fullName" << " client_interruption: "
+                            << client_interruption << endl;
 
                     if (suspectDuration > client_interruption) {
                         // start to terminate
@@ -1387,7 +1390,8 @@ void NodeCtrl::applyUpdate(UpdateApply* updateApply) {
 
 //            cout << "update position event at applyUpdate" << endl;
 
-            if (this->clientId == recipientId) {
+            if (this->clientId == recipientId
+                    && event.find("NPC") >= event.length()) {
                 continue;
             }
         } else if (event.find(event::TO_INIT) < event.length()) {

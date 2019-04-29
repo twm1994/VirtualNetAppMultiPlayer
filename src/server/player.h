@@ -60,6 +60,8 @@ public:
     bool touching_ground;
     u16 peer_id;
     float timeout_counter;
+    unsigned short skin;
+    unsigned short gear;
 
 private:
     bool m_is_local;

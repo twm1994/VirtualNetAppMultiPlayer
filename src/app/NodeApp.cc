@@ -542,14 +542,16 @@ std::string NodeApp::processData(u8 *data, u32 datasize, u16 peerId,
             player->setPosition(position);
             player->speed = speed;
             player->setRotation(rotation);
+            player->skin = readU16(&data[2 + 12 + 12 + 12]);
+            player->gear = readU16(&data[2 + 12 + 12 + 12 + 2]);
 
             // update state only if there is any state change
             if (player->isLocal()) {
                 float x = position.X;
                 float y = position.Y;
                 float z = position.Z;
-                unsigned short s = readU16(&data[2 + 12 + 12 + 12]);
-                unsigned short g = readU16(&data[2 + 12 + 12 + 12 + 2]);
+                unsigned short s = player->skin;
+                unsigned short g = player->gear;
                 if (this->position[0] != x || this->position[1] != y
                         || this->position[2] != z || skin != s || gear != g) {
                     version++;
@@ -584,8 +586,8 @@ std::string NodeApp::processData(u8 *data, u32 datasize, u16 peerId,
             writeV3S32(&reply[start + 2 + 12], speed2);
             writeV3S32(&reply[start + 2 + 12 + 12], rotation2);
             // send player state
-            writeU16(&reply[start + 2 + 12 + 12 + 12], skin);
-            writeU16(&reply[start + 2 + 12 + 12 + 12 + 2], gear);
+            writeU16(&reply[start + 2 + 12 + 12 + 12], player->skin);
+            writeU16(&reply[start + 2 + 12 + 12 + 12 + 2], player->gear);
             // Send as reliable
             //            m_con.SendToAll(0, data, false)
             std::string response;

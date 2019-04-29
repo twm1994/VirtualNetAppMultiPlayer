@@ -129,6 +129,7 @@ extern const char* EVENT_TIMEOUT;
 extern const char* GC_TIMEOUT;
 extern const char* CLIENT_INIT;
 extern const char* NPC_INIT;
+extern const char* NPC_UPDATE_POS;
 extern const char* NEIGHBOR_DISCOVERY;
 //extern const char* STEP_APP;
 
