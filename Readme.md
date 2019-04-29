@@ -2,6 +2,8 @@ The simplest Minecraft application for demonstrating the Virtual Net architectur
 
 The client can be built from the ![minetest_client!](https://github.com/sunniel/minetest_client) project.
 
+
+Notes:
 1. Link to windows API:
 Open Properties 
 -> Under the OMNeT++ section, go to Makemake 
