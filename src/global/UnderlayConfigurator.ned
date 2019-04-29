@@ -28,6 +28,8 @@ simple UnderlayConfigurator
         string nodeName;
         string clientType;
         string clientName;
+        string chord_type;
+        string chord_name;        
         double login_loop @unit(s);
         double remove_wait @unit(s);
     gates:

@@ -38,8 +38,4 @@ module GlobalObserver
             parameters:
                 @display("p=180,180;i=block/control");
         }
-        overlayManager: OverlayManager {
-            parameters:
-                @display("p=180,60;i=block/control");
-        }
 }

@@ -14,6 +14,9 @@
 //
 
 #include "UnderlayConfigurator.h"
+
+#include "../ctrl/ChordCtrl.h"
+
 #include "../server/connection.h"
 
 #include "../server/utility.h"
@@ -34,6 +37,7 @@ UnderlayConfigurator::UnderlayConfigurator() {
     neighborCreated = 0;
     loginMsg = NULL;
     stopwatch = 0;
+    chord_counter = 0;
 }
 
 UnderlayConfigurator::~UnderlayConfigurator() {
@@ -67,6 +71,9 @@ void UnderlayConfigurator::initialize(int stage) {
 
     WATCH_MAP(death_schedule);
 
+    // initialize Chord overlay
+    cMessage* clientInit = new cMessage(msg::INIT_CHORD);
+    scheduleAt(0, clientInit);
     scheduleAt(simTime() + loginLoop, loginMsg);
 }
 
@@ -94,7 +101,93 @@ void UnderlayConfigurator::handleMessage(cMessage* msg) {
     else if (msg->isName(msg::REVOKE_HOST)) {
         Termination* t = check_and_cast<Termination*>(msg);
         removeHost(t);
+    } else if (msg->isName(msg::INIT_CHORD)) {
+        initChordOverlay(msg);
     }
+}
+
+bool compare(ChordCtrl* a, ChordCtrl* b) {
+    return a->chordId < b->chordId;
+}
+
+void UnderlayConfigurator::initChordOverlay(cMessage* msg) {
+    vector<ChordCtrl*> overlay;
+    int size = parameterList->getChordInitSize();
+
+    const char* chordType = par("chord_type");
+    const char* chordName = par("chord_name");
+
+    for (int i = 0; i < size; i++) {
+        // create a new node
+        cModuleType *moduleType = cModuleType::get(chordType);
+        cModule* parent = getParentModule()->getSubmodule("ContentStorage");
+        // create (possibly compound) module and build its submodules (if any)
+        cModule* chord = moduleType->create(chordName, parent,
+                chord_counter + 1, chord_counter);
+        chord_counter++;
+        // set up parameters, if any
+        chord->finalizeParameters();
+        chord->buildInside();
+        // create activation messages
+        chord->scheduleStart(0);
+        chord->callInitialize(0);
+        // create address for the chord control protocol
+        ChordCtrl* ctrl = check_and_cast<ChordCtrl*>(
+                chord->getSubmodule("ctrl"));
+        IPvXAddress addr = IPAddress(NetworkAddress::freeAddress());
+        ctrl->setIPAddress(addr);
+        ctrl->chordId = util::getSHA1(addr.get4().str() + "4000",
+                parameterList->getAddrSpaceSize()); // Hash(IP || port)
+        chord->callInitialize(1);
+        // create meta information
+        SimpleNodeEntry* entry = new SimpleNodeEntry(chord);
+        ChordInfo* info = new ChordInfo(chord->getId(), chord->getFullName());
+        info->setEntry(entry);
+        info->setChordId(ctrl->chordId);
+        //add host to bootstrap oracle
+        globalNodeList->addPeer(addr, info);
+        overlay.push_back(ctrl);
+    }
+
+    // sort chord nodes by chordId
+    std::sort(overlay.begin(), overlay.end(), compare);
+
+    // create finger table and successor list for each chord node
+    for (int i = 0; i < overlay.size(); i++) {
+        ChordCtrl* ctrl = overlay[i];
+        for (int a = 0; a < parameterList->getSuccListSize(); a++) {
+            int index = (a + i + 1) % overlay.size();
+            ctrl->successorList[a] = overlay[index]->chordId;
+        }
+        if (i > 0) {
+            ctrl->predecessor = overlay[i - 1]->chordId;
+        } else {
+            ctrl->predecessor = overlay[overlay.size() - 1]->chordId;
+        }
+        int fingerTableSize = parameterList->getAddrSpaceSize();
+        for (int j = 0; j < fingerTableSize; j++) {
+            unsigned long a = (unsigned long) (ctrl->chordId
+                    + (unsigned long) pow(2, j))
+                    % (unsigned long) pow(2, fingerTableSize);
+            // find the chord node by for the given ID
+            ChordCtrl* cp = overlay[0];
+            for (int k = 0; k < overlay.size(); k++) {
+                ChordCtrl* temp = overlay[k];
+                if (temp->chordId >= a) {
+                    cp = temp;
+                    break;
+                }
+            }
+            ctrl->fingerTable[j] = cp->chordId;
+        }
+    }
+
+    for (auto elem : overlay) {
+        GlobalNodeListAccess().get()->ready(elem->chordId);
+        elem->startMaint();
+    }
+
+    delete msg;
 }
 
 void UnderlayConfigurator::handleClientLogin(cMessage* msg) {

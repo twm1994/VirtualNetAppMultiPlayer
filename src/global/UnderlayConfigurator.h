@@ -87,6 +87,7 @@ private:
     int lcCreated;
     int clientCreated;
     int neighborCreated;
+    int chord_counter;
 
     GlobalNodeList* globalNodeList;
     GlobalParameters* parameterList;
@@ -104,6 +105,7 @@ private:
     int stopwatch;
 
     void handleClientLogin(cMessage* msg);
+    void initChordOverlay(cMessage* msg);
 };
 
 #endif

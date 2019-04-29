@@ -49,7 +49,6 @@ OBJS = \
     $O/global/GlobalParameters.o \
     $O/global/GlobalStatistics.o \
     $O/global/ManualChurnGenerator.o \
-    $O/global/OverlayManager.o \
     $O/global/UnderlayConfigurator.o \
     $O/global/UniformChurnGenerator.o \
     $O/global/WeibullChurnGenerator.o \
