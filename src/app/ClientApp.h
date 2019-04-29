@@ -91,6 +91,7 @@ private:
     void Receive();
     void start(unsigned short port);
     bool checkExit(u8 *data, u32 datasize);
+    bool checkCollapse(u8 *data, u32 datasize);
     bool updatePosition(u8 *data, u32 datasize);
     void displayPosition(long x, long y);
 public:

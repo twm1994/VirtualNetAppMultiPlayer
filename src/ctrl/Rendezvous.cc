@@ -149,85 +149,102 @@ void Rendezvous::handleClientConnect(Connect* msg) {
 void Rendezvous::handleHeartbeatResp(HBResponse* hbr) {
 
     string host = hbr->getSourceName();
-    UDPControlInfo *udpCtrl = check_and_cast<UDPControlInfo *>(
-            hbr->getControlInfo());
-    IPvXAddress& srcAddr = udpCtrl->getSrcAddr();
 
-    if (timeouts.find(host) != timeouts.end()) {
-        TimeoutScheduler* timer = timeouts[host];
-        timer->timeout = simTime() + cycle;
-
-        HBProbe *heartbeat = new HBProbe(msg::HEARTBEAT);
-        stringstream sstream;
-        for (map<IPvXAddress, string>::iterator it = routingTable.begin();
-                it != routingTable.end(); ++it) {
-            string moduleName = it->first.get4().str();
-            sstream << moduleName << ";";
+    if (timeouts.count(host) > 0) {
+        TimeoutScheduler* ts = timeouts[host];
+        if (ts->hbr != NULL) {
+            delete ts->hbr;
         }
-        string members = sstream.str();
-        heartbeat->setSurvivals(members.c_str());
-
-//        int gateId = group[host];
-        heartbeat->setSourceName(fullName);
-        heartbeat->setDestName(host.c_str());
-        heartbeat->setTimestamp(simTime());
-        heartbeat->setLCName(LCName.c_str());
-        heartbeat->setIsInit(false);
-
-        UDPControlInfo* udpControlInfo = new UDPControlInfo();
-        udpControlInfo->setDestAddr(srcAddr);
-        udpControlInfo->setSrcAddr(ipAddress);
-        heartbeat->setControlInfo(udpControlInfo);
-        sendFixedDelay(heartbeat);
-
-        // reset timer
-        cancelEvent(timer->event);
-        timer->event->setTimeout(timer->timeout);
-        scheduleAt(timer->timeout, timer->event);
-        // update the monitored timeout value
-        timeouts[host] = timer;
-    } else {
-        EV << "[" << simTime() << "s] " << "Survivals no longer contains "
-                  << host << endl;
+        hbr->setTimestamp(simTime());
+        ts->hbr = hbr;
     }
-    // delete the received msg
-    delete hbr;
 }
 
-void Rendezvous::handleTimeout(HBTimeout* timeout) {
-    EV << "[" << simTime() << "s] " << "timeout: from "
-              << timeout->getHostName() << " to " << fullName << endl;
-
-    string host = timeout->getHostName();
-    string hostAddr = timeout->getHostAddr();
-    TimeoutScheduler* timer = timeouts[host];
-    EV << "[" << simTime() << "s] " << "Rendezvous remove event host: "
-              << timer->event->getHostName() << endl;
-
-    if (hasGUI()) {
-        string msg = "Remove " + host + " from group";
-        bubble(msg.c_str());
+void Rendezvous::handleTimeout(HBTimeout* hbt) {
+    string host = hbt->getHostName();
+    TimeoutScheduler* ts = timeouts[host];
+    simtime_t receiveTime = 0;
+    if (ts->hbr != NULL) {
+        receiveTime = ts->hbr->getTimestamp();
     }
+    simtime_t diff = simTime() - receiveTime;
 
-    IPvXAddress addr(hostAddr.c_str());
-    survivals.erase(addr);
-    routingTable.erase(addr);
-    timeouts.erase(host);
+    if (diff > cycle) {
+        cout << "[" << simTime() << "s] " << "timeout: from " << host << " to "
+                << fullName << endl;
 
-    // add new hosts if the current number of hosts is lower than the threshold
-    // get the logical computer module
-//        int threshold =
-//                ReplicaNumPolicyAccess().get(this->getParentModule())->getThreshold();
-    int groupSize =
-            ReplicaNumPolicyAccess().get(this->getParentModule())->maxReplicNumber();
-    int size = survivals.size();
-//        if (size < threshold) {
-    // if, in a small chance, all replica has been failed, re-initialized the entire replica group
-    bool init = (size == 0 ? true : false);
-    this->addNodes(groupSize - size, init);
-//        }
+        string hostAddr = hbt->getHostAddr();
+        TimeoutScheduler* timer = timeouts[host];
+        cout << "[" << simTime() << "s] " << "Rendezvous remove event host: "
+                << timer->event->getHostName() << endl;
 
-    cancelAndDelete(timer->event);
+        if (hasGUI()) {
+            string msg = "Remove " + host + " from group";
+            bubble(msg.c_str());
+        }
+
+        IPvXAddress addr(hostAddr.c_str());
+        survivals.erase(addr);
+        routingTable.erase(addr);
+        timeouts.erase(host);
+
+        // add new hosts if the current number of hosts is lower than the threshold
+        // get the logical computer module
+        //        int threshold =
+        //                ReplicaNumPolicyAccess().get(this->getParentModule())->getThreshold();
+        int groupSize =
+                ReplicaNumPolicyAccess().get(this->getParentModule())->maxReplicNumber();
+        int size = survivals.size();
+        //        if (size < threshold) {
+        // if, in a small chance, all replica has been failed, re-initialized the entire replica group
+        bool init = (size == 0 ? true : false);
+        this->addNodes(groupSize - size, init);
+        //        }
+
+        if (timer->hbr != NULL) {
+            delete timer->hbr;
+        }
+        cancelAndDelete(timer->event);
+
+    } else {
+        if (timeouts.find(host) != timeouts.end()) {
+            TimeoutScheduler* timer = timeouts[host];
+            timer->timeout = simTime() + cycle;
+
+            HBProbe *heartbeat = new HBProbe(msg::HEARTBEAT);
+            stringstream sstream;
+            for (map<IPvXAddress, string>::iterator it = routingTable.begin();
+                    it != routingTable.end(); ++it) {
+                string moduleName = it->first.get4().str();
+                sstream << moduleName << ";";
+            }
+            string members = sstream.str();
+            heartbeat->setSurvivals(members.c_str());
+
+            //        int gateId = group[host];
+            heartbeat->setSourceName(fullName);
+            heartbeat->setDestName(host.c_str());
+            heartbeat->setTimestamp(simTime());
+            heartbeat->setLCName(LCName.c_str());
+            heartbeat->setIsInit(false);
+
+            UDPControlInfo* udpControlInfo = new UDPControlInfo();
+            IPvXAddress srcAddr(hbt->getHostAddr());
+            udpControlInfo->setDestAddr(srcAddr);
+            udpControlInfo->setSrcAddr(ipAddress);
+            heartbeat->setControlInfo(udpControlInfo);
+            sendFixedDelay(heartbeat);
+
+            // reset timer
+            timer->event->setTimeout(timer->timeout);
+            scheduleAt(timer->timeout, timer->event);
+            // update the monitored timeout value
+            timeouts[host] = timer;
+        } else {
+            cout << "[" << simTime() << "s] " << "Survivals no longer contain "
+                    << host << endl;
+        }
+    }
 }
 
 void Rendezvous::addNodes(int num, bool isInit) {
@@ -305,6 +322,10 @@ void Rendezvous::disposeTimeouts() {
             if (timer != NULL) {
                 if (timer->event != NULL) {
                     cancelAndDelete(timer->event);
+
+                }
+                if (timer->hbr != NULL) {
+                    delete timer->hbr;
                 }
                 delete timer;
             }

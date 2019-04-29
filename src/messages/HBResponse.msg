@@ -23,7 +23,8 @@ cplusplus {{
 
 packet HBResponse {
     string displayString = DISPLAY_STR_MSG_HIDDEN;
-    
+    // logical computer name
+    string LCName;
     string sourceName;
     string destName;
     simtime_t timestamp;

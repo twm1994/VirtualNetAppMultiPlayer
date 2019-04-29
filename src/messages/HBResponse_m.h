@@ -28,7 +28,8 @@
  * packet HBResponse
  * {
  *     string displayString = DISPLAY_STR_MSG_HIDDEN;
- * 
+ *     // logical computer name
+ *     string LCName;
  *     string sourceName;
  *     string destName;
  *     simtime_t timestamp;
@@ -39,6 +40,7 @@ class HBResponse : public ::omnetpp::cPacket
 {
   protected:
     ::omnetpp::opp_string displayString;
+    ::omnetpp::opp_string LCName;
     ::omnetpp::opp_string sourceName;
     ::omnetpp::opp_string destName;
     ::omnetpp::simtime_t timestamp;
@@ -62,6 +64,8 @@ class HBResponse : public ::omnetpp::cPacket
     // field getter/setter methods
     virtual const char * getDisplayString() const;
     virtual void setDisplayString(const char * displayString);
+    virtual const char * getLCName() const;
+    virtual void setLCName(const char * LCName);
     virtual const char * getSourceName() const;
     virtual void setSourceName(const char * sourceName);
     virtual const char * getDestName() const;

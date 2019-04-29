@@ -27,29 +27,13 @@
 #include "../others/BasicReplicaNumPolicy.h"
 #include "../others/ReplicaNumPolicy.h"
 #include "../others/ReplicaNumPolicyAccess.h"
+#include "../others/TimeoutScheduler.h"
 #include "../messages/UDPControlInfo_m.h"
-#include "../messages/HBTimeout_m.h"
-#include "../messages/HBResponse_m.h"
-#include "../messages/HBProbe_m.h"
 #include "../messages/Connect_m.h"
 #include "../messages/ConnectReply_m.h"
 
 using namespace std;
 using namespace omnetpp;
-
-class TimeoutScheduler {
-private:
-
-public:
-    simtime_t timeout;
-    HBTimeout* event;
-    TimeoutScheduler() {
-        timeout = 0.0;
-        event = NULL;
-    }
-    ~TimeoutScheduler() {
-    }
-};
 
 class Rendezvous: public HostBase {
 private:
@@ -57,11 +41,17 @@ private:
     string LCName;
     unsigned short peer_id;
     set<IPvXAddress> survivals;
+    // for address-host mapping
     map<IPvXAddress, string> routingTable;
-    // It is better to use pointer in map if the referenced object contains a pointer member.
-    // The pointer should be released later.
-    // This map cannot be assigned to WATCH_MAP, which will cause compilation error.
+    /*
+     * It is better to use pointer in map (<host_name, TimeoutScheduler>),
+     * if the referenced object contains a pointer member.
+     * The pointer should be released later.
+     * This map cannot be assigned to WATCH_MAP, which will cause compilation error.
+     */
     map<string, TimeoutScheduler*> timeouts;
+    // timeouts for clients
+    map<string, TimeoutScheduler*> ctimeouts;
     simtime_t cycle;
     // host creation counter
     int hostCreated;

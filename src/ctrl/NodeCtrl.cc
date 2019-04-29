@@ -39,6 +39,7 @@ NodeCtrl::NodeCtrl() {
     suspect_client = false;
     suspectStart = 0;
     reconfigTH = 0;
+    lastHB = NULL;
 
     updateTimeout = new cMessage(msg::UPDATE_CYCLE);
     ECTimeout = new cMessage(msg::EC_START);
@@ -58,6 +59,9 @@ NodeCtrl::~NodeCtrl() {
     }
     if (hbTimeout != NULL) {
         cancelAndDelete(hbTimeout);
+    }
+    if (lastHB != NULL) {
+        delete lastHB;
     }
 }
 
@@ -126,6 +130,9 @@ void NodeCtrl::initialize(int stage) {
 
         app = dynamic_cast<NodeApp*>(this->getParentModule()->getSubmodule(
                 "app"));
+
+        simtime_t cycle = getParentModule()->par("HBcycle");
+        scheduleAt(simTime() + cycle, hbTimeout);
     }
 }
 
@@ -293,7 +300,13 @@ void NodeCtrl::handleHeartbeat(HBProbe *hb) {
         initNode(starttime);
     }
 
-// send heartbeat response
+// record the new heartbeat response
+    if (lastHB != NULL) {
+        // delete the last received heartbeat
+        delete lastHB;
+    }
+
+    // send heartbeat response
     HBResponse* hbr = new HBResponse(msg::HEARTBEAT_RESPONSE);
     hbr->setSourceName(fullName);
     hbr->setDestName(dest.c_str());
@@ -305,20 +318,27 @@ void NodeCtrl::handleHeartbeat(HBProbe *hb) {
     hbr->setControlInfo(udpControlInfo);
     sendFixedDelay(hbr);
 
-    // set heartbeat timeout
-    cancelEvent(hbTimeout);
-    simtime_t cycle = getParentModule()->par("HBcycle");
-    scheduleAt(simTime() + cycle, hbTimeout);
-
-    // delete the received msg
-    delete hb;
+    hb->setTimestamp(simTime());
+    lastHB = hb;
 }
 
 void NodeCtrl::handleHeartbeatTimeout(HBTimeout* hbt) {
-
-    receiveClient = false;
-    app->onExit();
-    is_hbto = true;
+    simtime_t cycle = getParentModule()->par("HBcycle");
+    simtime_t receiveTime = 0;
+    if (lastHB != NULL) {
+        receiveTime = lastHB->getTimestamp();
+    }
+    simtime_t diff = simTime() - receiveTime;
+    if (diff > cycle) {
+        receiveClient = false;
+        app->onExit();
+        is_hbto = true;
+    } else {
+        if (lastHB != NULL) {
+            // set heartbeat timeout
+            scheduleAt(simTime() + cycle, hbTimeout);
+        }
+    }
 }
 
 void NodeCtrl::initNode(simtime_t starttime) {

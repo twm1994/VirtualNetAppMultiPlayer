@@ -205,6 +205,7 @@ HBResponse& HBResponse::operator=(const HBResponse& other)
 void HBResponse::copy(const HBResponse& other)
 {
     this->displayString = other.displayString;
+    this->LCName = other.LCName;
     this->sourceName = other.sourceName;
     this->destName = other.destName;
     this->timestamp = other.timestamp;
@@ -214,6 +215,7 @@ void HBResponse::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::omnetpp::cPacket::parsimPack(b);
     doParsimPacking(b,this->displayString);
+    doParsimPacking(b,this->LCName);
     doParsimPacking(b,this->sourceName);
     doParsimPacking(b,this->destName);
     doParsimPacking(b,this->timestamp);
@@ -223,6 +225,7 @@ void HBResponse::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::omnetpp::cPacket::parsimUnpack(b);
     doParsimUnpacking(b,this->displayString);
+    doParsimUnpacking(b,this->LCName);
     doParsimUnpacking(b,this->sourceName);
     doParsimUnpacking(b,this->destName);
     doParsimUnpacking(b,this->timestamp);
@@ -236,6 +239,16 @@ const char * HBResponse::getDisplayString() const
 void HBResponse::setDisplayString(const char * displayString)
 {
     this->displayString = displayString;
+}
+
+const char * HBResponse::getLCName() const
+{
+    return this->LCName.c_str();
+}
+
+void HBResponse::setLCName(const char * LCName)
+{
+    this->LCName = LCName;
 }
 
 const char * HBResponse::getSourceName() const
@@ -333,7 +346,7 @@ const char *HBResponseDescriptor::getProperty(const char *propertyname) const
 int HBResponseDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 5+basedesc->getFieldCount() : 5;
 }
 
 unsigned int HBResponseDescriptor::getFieldTypeFlags(int field) const
@@ -349,8 +362,9 @@ unsigned int HBResponseDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *HBResponseDescriptor::getFieldName(int field) const
@@ -363,11 +377,12 @@ const char *HBResponseDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "displayString",
+        "LCName",
         "sourceName",
         "destName",
         "timestamp",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<5) ? fieldNames[field] : nullptr;
 }
 
 int HBResponseDescriptor::findField(const char *fieldName) const
@@ -375,9 +390,10 @@ int HBResponseDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='d' && strcmp(fieldName, "displayString")==0) return base+0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sourceName")==0) return base+1;
-    if (fieldName[0]=='d' && strcmp(fieldName, "destName")==0) return base+2;
-    if (fieldName[0]=='t' && strcmp(fieldName, "timestamp")==0) return base+3;
+    if (fieldName[0]=='L' && strcmp(fieldName, "LCName")==0) return base+1;
+    if (fieldName[0]=='s' && strcmp(fieldName, "sourceName")==0) return base+2;
+    if (fieldName[0]=='d' && strcmp(fieldName, "destName")==0) return base+3;
+    if (fieldName[0]=='t' && strcmp(fieldName, "timestamp")==0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -393,9 +409,10 @@ const char *HBResponseDescriptor::getFieldTypeString(int field) const
         "string",
         "string",
         "string",
+        "string",
         "simtime_t",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **HBResponseDescriptor::getFieldPropertyNames(int field) const
@@ -463,9 +480,10 @@ std::string HBResponseDescriptor::getFieldValueAsString(void *object, int field,
     HBResponse *pp = (HBResponse *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getDisplayString());
-        case 1: return oppstring2string(pp->getSourceName());
-        case 2: return oppstring2string(pp->getDestName());
-        case 3: return simtime2string(pp->getTimestamp());
+        case 1: return oppstring2string(pp->getLCName());
+        case 2: return oppstring2string(pp->getSourceName());
+        case 3: return oppstring2string(pp->getDestName());
+        case 4: return simtime2string(pp->getTimestamp());
         default: return "";
     }
 }
@@ -481,9 +499,10 @@ bool HBResponseDescriptor::setFieldValueAsString(void *object, int field, int i,
     HBResponse *pp = (HBResponse *)object; (void)pp;
     switch (field) {
         case 0: pp->setDisplayString((value)); return true;
-        case 1: pp->setSourceName((value)); return true;
-        case 2: pp->setDestName((value)); return true;
-        case 3: pp->setTimestamp(string2simtime(value)); return true;
+        case 1: pp->setLCName((value)); return true;
+        case 2: pp->setSourceName((value)); return true;
+        case 3: pp->setDestName((value)); return true;
+        case 4: pp->setTimestamp(string2simtime(value)); return true;
         default: return false;
     }
 }

@@ -133,6 +133,11 @@ void ClientApp::Receive() {
             } else if (checkExit(*data, datasize)) {
                 content = content + "|" + event::TO_EXIT;
                 CoordinatorAccess().get()->deleteClient(fullName);
+            } else if (checkCollapse(*data, datasize)) {
+                // collapse the client
+                ctrl->toExit = true;
+                UnderlayConfiguratorAccess().get()->revokeClient(ipAddress);
+                return;
             }
 
             ctrl->cacheAppData(content);
@@ -155,6 +160,24 @@ bool ClientApp::checkExit(u8 *data, u32 datasize) {
             return false;
         ToServerCommand command = (ToServerCommand) readU16(&data[0]);
         if (command == TOSERVER_EXIT) {
+            return true;
+        }
+    } catch (SendFailedException &e) {
+        std::cout << "Server::ProcessData(): SendFailedException: " << "what="
+                << e.what() << std::endl;
+        dout_ca << simTime() << " " << fullName
+                << " Server::ProcessData(): SendFailedException: " << "what="
+                << e.what() << std::endl;
+    }
+    return false;
+}
+
+bool ClientApp::checkCollapse(u8 *data, u32 datasize) {
+    try {
+        if (datasize < 2)
+            return false;
+        ToServerCommand command = (ToServerCommand) readU16(&data[0]);
+        if (command == TOSERVER_COLLAPSE) {
             return true;
         }
     } catch (SendFailedException &e) {

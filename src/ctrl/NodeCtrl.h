@@ -241,6 +241,7 @@ private:
      * Events
      */
     cMessage* updateTimeout;
+    HBProbe* lastHB;
     cMessage* ECTimeout;
     cMessage* GCTimeout;
     HBTimeout* hbTimeout;

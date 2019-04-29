@@ -84,6 +84,9 @@ const char* msg::CONFIG_UPDATE = "CONFIG_UPDATE";
 const char* msg::HANDSHAKE_TIMEOUT = "HANDSHAKE_TIMEOUT";
 const char* msg::HANDSHAKE_REJECT = "HANDSHAKE_REJECT";
 const char* msg::HANDSHAKE = "HANDSHAKE";
+const char* msg::CLIENT_TIMEOUT = "CLIENT_TIMEOUT";
+const char* msg::CLIENT_HB = "CLIENT_HB";
+const char* msg::CLIENT_HB_RESPONSE = "CLIENT_HB_RESPONSE";
 
 const char* msg::NEIGHBOR_ADD = "NEIGHBOR_ADD";
 const char* msg::NEIGHBOR_RM = "NEIGHBOR_RM";

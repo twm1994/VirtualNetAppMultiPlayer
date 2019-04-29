@@ -90,6 +90,9 @@ extern const char* CONFIG_UPDATE;
 extern const char* HANDSHAKE_TIMEOUT;
 extern const char* HANDSHAKE_REJECT;
 extern const char* HANDSHAKE;
+extern const char* CLIENT_TIMEOUT;
+extern const char* CLIENT_HB;
+extern const char* CLIENT_HB_RESPONSE;
 
 // messages for add/remove neighbor
 extern const char* NEIGHBOR_ADD;
