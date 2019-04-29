@@ -84,26 +84,22 @@ void UnderlayConfigurator::finish() {
 void UnderlayConfigurator::handleMessage(cMessage* msg) {
     if (msg->isName(msg::FAILURE)) {
         Failure* failure = check_and_cast<Failure*>(msg);
-        std::string hostAddress = failure->getHostAddress();
-        EV << "[" << simTime() << "s] " << hostAddress << " is failed" << endl;
-        IPvXAddress ipAddress(hostAddress.c_str());
-        removeNode(ipAddress);
+        handleNodeFailure(failure);
     } else if (msg->isName(msg::LOGIN_LOOP)) {
         handleClientLogin(msg);
-    }
-//    else if (msg->isName(msg::REVOKE_LC)) {
-//        Termination* t = check_and_cast<Termination*>(msg);
-//        removeLogicComputer(t);
-//    } else if (msg->isName(msg::REVOKE_CLIENT)) {
-//        Termination* t = check_and_cast<Termination*>(msg);
-//        removeClient(t);
-//    }
-    else if (msg->isName(msg::REVOKE_HOST)) {
+    } else if (msg->isName(msg::REVOKE_HOST)) {
         Termination* t = check_and_cast<Termination*>(msg);
         removeHost(t);
     } else if (msg->isName(msg::INIT_CHORD)) {
         initChordOverlay(msg);
     }
+}
+
+void UnderlayConfigurator::handleNodeFailure(Failure* failure) {
+    std::string hostAddress = failure->getHostAddress();
+    EV << "[" << simTime() << "s] " << hostAddress << " is failed" << endl;
+    IPvXAddress ipAddress(hostAddress.c_str());
+    revokeNode(ipAddress, true);
 }
 
 bool compare(ChordCtrl* a, ChordCtrl* b) {
@@ -392,30 +388,6 @@ void UnderlayConfigurator::removeNode(IPvXAddress& nodeAddr) {
         failures.erase(nodeAddr.get4().str());
     }
 }
-
-//void UnderlayConfigurator::removeLogicComputer(Termination* t) {
-//
-//    cout << "Remove LC" << endl;
-//
-//    cModule* LC = getSimulation()->getModuleByPath(t->getModulePath());
-//
-//    LC->callFinish();
-//    LC->deleteModule();
-//
-//    delete t;
-//}
-//
-//void UnderlayConfigurator::removeClient(Termination* t) {
-//
-//    cout << "Remove Client" << endl;
-//
-//    cModule* LC = getSimulation()->getModuleByPath(t->getModulePath());
-//
-//    LC->callFinish();
-//    LC->deleteModule();
-//
-//    delete t;
-//}
 
 void UnderlayConfigurator::removeHost(Termination* t) {
 

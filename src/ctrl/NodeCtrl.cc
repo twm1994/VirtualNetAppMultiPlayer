@@ -1753,7 +1753,7 @@ Value NodeCtrl::computeCCSnapshot() {
             highest_epoch = replica_epoch;
         }
         /*
-         * Check whether state sync is needed (i.e., last reconfiguration has been done).
+         * Check whether state sync is needed (i.e., last reconfiguration has been done or not).
          */
         int replica_gid = jState["GID"].asInt();
         if (replica_gid != groupId) {
@@ -1946,6 +1946,31 @@ void NodeCtrl::handleCCEnd(CCEnd* cce) {
                         // update seniority
                         seniorities[host] = seniority + 1;
                     }
+                }
+
+                // notify membership change to senders (i.e., the clients and neighboring Meshes)
+                if (coord.compare(ipAddress.get4().str()) == 0) {
+                    set<string> configs;
+                    for (auto elem : members) {
+                        configs.insert(elem);
+                    }
+                    string configList = util::convertSetToStr(configs, 0);
+                    set<string> eventSenderList;
+                    for (auto elem : clients) {
+                        string senderAddr = elem.second;
+                        eventSenderList.insert(senderAddr);
+                    }
+                    ConfigUpdate* configeUpdate = new ConfigUpdate(
+                            msg::CONFIG_UPDATE);
+                    configeUpdate->setConfigs(configList.c_str());
+                    configeUpdate->setSourceName(fullName);
+                    configeUpdate->setLCName(LCName.c_str());
+                    // message size: size of the new configuration list + size of the logical computer name
+                    configeUpdate->setByteLength(
+                            configList.size() + LCName.size());
+                    r_multicast(configeUpdate, eventSenderList);
+
+                    GlobalStatisticsAccess().get()->increaseReconfigurationEnd();
                 }
 
                 /*
@@ -2294,8 +2319,10 @@ void NodeCtrl::handleRestore(Restore* restore) {
         membersTemp.clear();
         mode = EH;
 
-        cout << fullName << " appState: " << init["app_state"].asString() << endl;
-        cout << fullName << " last_q_state: " << init["last_q_state"].asString() << endl;
+        cout << fullName << " appState: " << init["app_state"].asString()
+                << endl;
+        cout << fullName << " last_q_state: " << init["last_q_state"].asString()
+                << endl;
         cout << fullName << " lastDelivered key: " << lastDelivered << endl;
         cout << fullName << " lastDelivered event: " << state.second << endl;
 
@@ -2648,7 +2675,7 @@ void NodeCtrl::handleGREnd(GREnd* gre) {
         membersTemp.clear();
         mode = EH;
 
-        // notify configuration change to senders (i.e., the clients and neighboring Meshes)
+        // notify membership change to senders (i.e., the clients and neighboring Meshes)
         if (coord.compare(ipAddress.get4().str()) == 0) {
             set<string> configs;
             for (auto elem : members) {

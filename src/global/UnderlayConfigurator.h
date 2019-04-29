@@ -56,8 +56,6 @@ public:
     TransportAddress* createNode(cModule* parent, int nodeCreated);
     TransportAddress* registerEndpoint(cModule* host);
     void removeNode(IPvXAddress& nodeAddr);
-//    void removeLogicComputer(Termination* t);
-//    void removeClient(Termination* t);
     void removeHost(Termination* t);
     // remove all the connections to the Mesh; if toRemoveNode = true, the node  will be timed to remove
     void revokeNode(IPvXAddress& nodeAddr, bool toRemoveNode = false);
@@ -104,6 +102,7 @@ private:
 
     int stopwatch;
 
+    void handleNodeFailure(Failure* failure);
     void handleClientLogin(cMessage* msg);
     void initChordOverlay(cMessage* msg);
 };
