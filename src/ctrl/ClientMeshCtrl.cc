@@ -397,11 +397,6 @@ string ClientMeshCtrl::getPlayerPosition() {
     v3s32 speed(sf.X * 100, sf.Y * 100, sf.Z * 100);
     v3s32 rotation(rf.X * 100, rf.Y * 100, rf.Z * 100);
 
-    v3s16 pos = v3s16((s16) (position.X / (100 * MAP_BLOCKSIZE)),
-            (s16) (position.Y / (100 * MAP_BLOCKSIZE)),
-            (s16) (position.Z / (100 * MAP_BLOCKSIZE)));
-    m_env.getMap().getBlock(pos);
-
     SharedBuffer<u8> data(2 + 12 + 12 + 12 + 2 + 2);
     writeU16(&data[0], TOSERVER_PLAYERPOS);
     writeV3S32(&data[2], position);
@@ -420,13 +415,19 @@ string ClientMeshCtrl::getPlayerPosition() {
 }
 
 void ClientMeshCtrl::updatePlayerPosition(cMessage* msg) {
+
+    NPC* npc = m_env.getNPC();
+    v3f pf = npc->getPosition();
+    v3s32 position(pf.X * 100, pf.Y * 100, pf.Z * 100);
+    v3s16 pos = v3s16((s16) (position.X / (100 * MAP_BLOCKSIZE)),
+            (s16) (position.Y / (100 * MAP_BLOCKSIZE)),
+            (s16) (position.Z / (100 * MAP_BLOCKSIZE)));
+    m_env.getMap().getBlock(pos);
+
     // update simulation first
     m_env.step(cycle.dbl());
 
     // update coordinator record and map position
-    NPC* npc = m_env.getNPC();
-    v3f pf = npc->getPosition();
-    v3s32 position(pf.X * 100, pf.Y * 100, pf.Z * 100);
     Coordinate ps((long) position.X / 100, (long) position.Z / 100);
     Coordinate c = CoordinatorAccess().get()->mapLocation(ps);
     displayPosition(c.x, c.y);
