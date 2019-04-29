@@ -1,6 +1,6 @@
 The simplest Minecraft application for demonstrating the Virtual Net architecture. The network communication are simulated through OMNeT++ messaging function. Each user is assigned a Mesh.
 
-The client can be built from the ![minetest_client!](https://github.com/sunniel/minetest_client) project.
+The client can be built from the ![minetest_client](https://github.com/sunniel/minetest_client) project.
 
 
 Notes:
