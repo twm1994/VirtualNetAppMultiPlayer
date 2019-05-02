@@ -640,22 +640,22 @@ void NodeCtrl::collectRoundEvents() {
             string clientEvent = Qp[qpKey];
             if (clientEvent.compare(event::MISS_EVENT) == 0) {
 
-                dout << fullName << " failed to receive a client event" << endl;
+//                dout << fullName << " failed to receive a client event" << endl;
 
                 if (!suspect_client) {
 
-                    cout << "fullName" << " start to suspect the client"
-                            << endl;
+//                    dout << "fullName" << " start to suspect the client"
+//                            << endl;
 
                     suspect_client = true;
                     suspectStart = simTime();
                 } else {
                     simtime_t suspectDuration = simTime() - suspectStart;
 
-                    cout << "fullName" << " suspectDuration: "
-                            << suspectDuration << endl;
-                    cout << "fullName" << " client_interruption: "
-                            << client_interruption << endl;
+//                    dout << "fullName" << " suspectDuration: "
+//                            << suspectDuration << endl;
+//                    dout << "fullName" << " client_interruption: "
+//                            << client_interruption << endl;
 
                     if (suspectDuration > client_interruption) {
                         // start to terminate

@@ -19,32 +19,32 @@ Environment::~Environment() {
 
 // Dead-reckoning for player position update and player connection timeout along with time advancement
 void Environment::step(float dtime) {
-    // Increment timeout of players
-    // TODO: Must reset the timeout somewhere, too.
-    for (irr::core::list<Player*>::Iterator i = m_players.begin();
-            i != m_players.end(); i++) {
-        Player *player = *i;
-        player->timeout_counter += dtime;
-    }
-    // Remove timed-out players
-    removed: for (irr::core::list<Player*>::Iterator i = m_players.begin();
-            i != m_players.end(); i++) {
-        Player *player = *i;
-
-        // Don't remove local player
-        if (player->isLocal())
-            continue;
-
-        // 5 seconds is fine, the player will spawn again with no
-        // problems anyway
-        if (player->timeout_counter > 5.0) {
-            m_dout << "Environment: Removing timed-out player "
-                    << player->peer_id << std::endl;
-            delete player;
-            m_players.erase(i);
-            goto removed;
-        }
-    }
+//    // Increment timeout of players
+//    // TODO: Must reset the timeout somewhere, too.
+//    for (irr::core::list<Player*>::Iterator i = m_players.begin();
+//            i != m_players.end(); i++) {
+//        Player *player = *i;
+//        player->timeout_counter += dtime;
+//    }
+//    // Remove timed-out players
+//    removed: for (irr::core::list<Player*>::Iterator i = m_players.begin();
+//            i != m_players.end(); i++) {
+//        Player *player = *i;
+//
+//        // Don't remove local player
+//        if (player->isLocal())
+//            continue;
+//
+//        // 5 seconds is fine, the player will spawn again with no
+//        // problems anyway
+//        if (player->timeout_counter > 5.0) {
+//            m_dout << "Environment: Removing timed-out player "
+//                    << player->peer_id << std::endl;
+//            delete player;
+//            m_players.erase(i);
+//            goto removed;
+//        }
+//    }
 
     f32 maximum_player_speed = 0.001; // just some small value
     for (irr::core::list<Player*>::Iterator i = m_players.begin();

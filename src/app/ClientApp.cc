@@ -284,7 +284,9 @@ void ClientApp::displayPosition(long x, long y) {
     }
     circle = new cOvalFigure("AoI");
     double mapRadius = perception;
-    cout << "mapRadius: " << mapRadius << endl;
+
+//    cout << "mapRadius: " << mapRadius << endl;
+
     circle->setBounds(
             cFigure::Rectangle((double) (x - mapRadius),
                     (double) (y - mapRadius), (double) (2 * mapRadius),
