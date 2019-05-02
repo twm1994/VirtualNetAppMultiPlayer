@@ -22,7 +22,7 @@ import hosts.*;
 network VirtualNet
 {
     parameters:
-        @display("bgb=1080,720;");
+        @display("bgb=1080,850;");
         @statistic[InteractionLatency](source=latency; title="Interaction Latency"; record=stats);
         @statistic[DeliveryQueueLength](source=QdLength; title="Delivery queue length"; record=stats);
         int npc_num = default(1);

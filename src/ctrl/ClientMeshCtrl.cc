@@ -85,11 +85,14 @@ void ClientMeshCtrl::initialize(int stage) {
         // initialize the map blocks
         initMap(position);
 
+        cout << "NPC init position: " << npc->getPosition().X << ", "
+                << npc->getPosition().Y << ", " << npc->getPosition().Z << endl;
+
         // initialize vertical position for NPC landing
         f32 oldY;
         do {
             oldY = npc->getPosition().Y;
-            m_env.step(cycle.dbl());
+            m_env.initNPC(cycle.dbl());
         } while (oldY != npc->getPosition().Y);
 
         cout << "NPC position: " << npc->getPosition().X << ", "
@@ -427,6 +430,9 @@ void ClientMeshCtrl::updatePlayerPosition(cMessage* msg) {
     // update simulation first
     m_env.step(cycle.dbl());
 
+    cout << fullName << " updatePlayerPosition: " << npc->getPosition().X << ", "
+            << npc->getPosition().Z << endl;
+
     // update coordinator record and map position
     Coordinate ps((long) position.X / 100, (long) position.Z / 100);
     Coordinate c = CoordinatorAccess().get()->mapLocation(ps);
@@ -438,6 +444,9 @@ void ClientMeshCtrl::updatePlayerPosition(cMessage* msg) {
 }
 
 void ClientMeshCtrl::displayPosition(long x, long y) {
+
+    cout << fullName << " displayPosition: " << x << ", " << y << endl;
+
     getParentModule()->getDisplayString().setTagArg("p", 0, x);
     getParentModule()->getDisplayString().setTagArg("p", 1, y);
 }

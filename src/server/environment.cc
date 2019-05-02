@@ -100,6 +100,51 @@ void Environment::step(float dtime) {
 
 }
 
+// Dead-reckoning for player position update and player connection timeout along with time advancement
+void Environment::initNPC(float dtime) {
+    f32 maximum_player_speed = 0.001; // just some small value
+    for (irr::core::list<Player*>::Iterator i = m_players.begin();
+            i != m_players.end(); i++) {
+        f32 speed = (*i)->speed.getLength();
+        if (speed > maximum_player_speed)
+            maximum_player_speed = speed;
+    }
+
+    // Calculate the maximum time increment (for collision detection etc)
+    // Allow 0.1 blocks per increment
+    // time = distance / speed
+    f32 dtime_max_increment = 0.1 * BS / maximum_player_speed;
+    // Maximum time increment is 10ms or lower
+    if (dtime_max_increment > 0.01)
+        dtime_max_increment = 0.01;
+
+    /*
+     Stuff that has a maximum time increment
+     */
+    // Don't allow overly too much dtime
+    if (dtime > 0.5)
+        dtime = 0.5;
+    do {
+        f32 dtime_part;
+        if (dtime > dtime_max_increment)
+            dtime_part = dtime_max_increment;
+        else
+            dtime_part = dtime;
+        dtime -= dtime_part;
+
+        /*
+         Move npc
+         */
+        if (m_npc) {
+            // initial vertical position
+            m_npc->speed.Y -= 9.81 * BS * dtime_part * 2;
+            m_npc->move(dtime_part, *m_map);
+        }
+
+    } while (dtime > 0.001);
+
+}
+
 Map & Environment::getMap() {
     return *m_map;
 }

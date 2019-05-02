@@ -2,13 +2,13 @@
 #define ENVIRONMENT_HEADER
 
 /*
-	This class is the game's environment.
-	It contains:
-	- The map
-	- Players
-	- Other objects
-	- The current time in the game, etc.
-*/
+ This class is the game's environment.
+ It contains:
+ - The map
+ - Players
+ - Other objects
+ - The current time in the game, etc.
+ */
 
 #include <list>
 #include <ostream>
@@ -17,37 +17,38 @@
 #include "map.h"
 #include "npc.h"
 
-class Environment
-{
+class Environment {
 public:
-	// Environment will delete the map passed to the constructor
-	Environment(Map *map, std::ostream &dout);
-	~Environment();
-	/*
-		This can do anything to the environment:
-		1) removing timed-out players,
-		2) update player position through player move
-	*/
-	void step(f32 dtime);
+    // Environment will delete the map passed to the constructor
+    Environment(Map *map, std::ostream &dout);
+    ~Environment();
 
-	Map & getMap();
-	void setMap(Map* map);
-	/*
-		Environment deallocates players after use.
-	*/
-	void addPlayer(Player *player);
+    void initNPC(float dtime);
+    /*
+     This can do anything to the environment:
+     1) removing timed-out players,
+     2) update player position through player move
+     */
+    void step(f32 dtime);
+
+    Map & getMap();
+    void setMap(Map* map);
+    /*
+     Environment deallocates players after use.
+     */
+    void addPlayer(Player *player);
     NPC* getNPC();
     void setNPC(NPC *npc);
-	void removePlayer(Player *player);
-	Player * getLocalPlayer();
-	Player * getPlayer(u16 peer_id);
-	irr::core::list<Player*> getPlayers();
+    void removePlayer(Player *player);
+    Player * getLocalPlayer();
+    Player * getPlayer(u16 peer_id);
+    irr::core::list<Player*> getPlayers();
 private:
-	Map *m_map;
-	irr::core::list<Player*> m_players;
+    Map *m_map;
+    irr::core::list<Player*> m_players;
     NPC* m_npc;
-	// Debug output goes here
-	std::ostream &m_dout;
+    // Debug output goes here
+    std::ostream &m_dout;
 };
 
 #endif
