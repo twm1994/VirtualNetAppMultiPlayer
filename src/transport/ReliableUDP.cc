@@ -81,7 +81,7 @@ void ReliableUDP::handleOutgoingMessage(cMessage* packet) {
         }
 
         // calculate the whole latency, in second
-        simtime_t delay = 0;
+        simtime_t delay = mtu_delay;
         // reliable packet sent for each MTU
         int packetNum = 1;
         // message size, in bit
@@ -90,24 +90,28 @@ void ReliableUDP::handleOutgoingMessage(cMessage* packet) {
                         dynamic_cast<cPacket*>(packet)->getBitLength() : 0;
         if (msgSize > 0) {
             packetNum = ceil((msgSize) / (double) MTU);
+            // delay = propagation delay + transmission delay
+            delay = msgSize / BW + mtu_delay;
         }
+        simtime_t total_packet_delay = 0;
         for (int i = 0; i < packetNum; i++) {
-            simtime_t packet_delay = mtu_delay;
+            simtime_t packet_delay = 0;
             double packetLoss = uniform(0, 1);
             // in case of packet loss, re-send the packet
             while (packetLoss < pktLossRate) {
-                packetLoss = uniform(0, 1);
                 packet_delay += mtu_delay;
+                packetLoss = uniform(0, 1);
             }
-            delay += packet_delay;
+            total_packet_delay += packet_delay;
         }
+        delay += total_packet_delay;
 
-//        cout << "distance: " << distance << endl;
-//        cout << "Dmin: " << Dmin << endl;
-//        cout << "Dcomm: " << Dcomm << endl;
-//        cout << "Dvar: " << Dvar << endl;
+//        cout << "BW: " << BW << endl;
+//        cout << "MTU: " << MTU << endl;
 //        cout << "mtu_delay: " << mtu_delay << endl;
-//        cout << "mesage size: " << msgSize << endl;
+//        cout << "msgSize: " << msgSize << endl;
+//        cout << "packetNum: " << packetNum << endl;
+//        cout << "total_packet_delay: " << total_packet_delay << endl;
 //        cout << "delay: " << delay << endl;
 
         cSimpleModule::sendDirect(packet, delay, 0,

@@ -85,7 +85,8 @@ void SimpleUDP::handleOutgoingMessage(cMessage* packet) {
                 dynamic_cast<cPacket*>(packet) != NULL ?
                         dynamic_cast<cPacket*>(packet)->getBitLength() : 0;
         if (msgSize > 0) {
-            delay = ceil((msgSize) / (double) MTU) * mtu_delay;
+            // delay = propagation delay + transmission delay
+            delay = msgSize / BW + mtu_delay;
         }
 
 //        EV << "distance: " << distance << endl;
