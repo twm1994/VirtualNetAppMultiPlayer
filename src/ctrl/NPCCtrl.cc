@@ -13,33 +13,33 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ClientMeshCtrl.h"
+#include "NPCCtrl.h"
 
 s16 g_viewing_range_nodes = MAP_BLOCKSIZE;
 
-Define_Module(ClientMeshCtrl);
+Define_Module(NPCCtrl);
 
-ClientMeshCtrl::ClientMeshCtrl() :
+NPCCtrl::NPCCtrl() :
         m_env(new MasterMap(), std::cout) {
     STAGE_NUM = 2;
-    // NPC simulation step interval
+    // NPCCtrl simulation step interval
     cycle = 1.0;
     skin = 99;
     gear = 0;
     updatePosition = NULL;
 }
 
-ClientMeshCtrl::~ClientMeshCtrl() {
+NPCCtrl::~NPCCtrl() {
     if (updatePosition != NULL) {
         cancelAndDelete(updatePosition);
     }
 }
 
-int ClientMeshCtrl::numInitStages() const {
+int NPCCtrl::numInitStages() const {
     return STAGE_NUM;
 }
 
-void ClientMeshCtrl::initialize(int stage) {
+void NPCCtrl::initialize(int stage) {
     if (stage == 0) {
         HostBase::initialize();
         fullName = getParentModule()->getFullName();
@@ -103,7 +103,7 @@ void ClientMeshCtrl::initialize(int stage) {
     }
 }
 
-void ClientMeshCtrl::initMap(v3f position) {
+void NPCCtrl::initMap(v3f position) {
 
     core::aabbox3d<s16> box_nodes(Map::floatToInt(position));
 
@@ -130,11 +130,11 @@ void ClientMeshCtrl::initMap(v3f position) {
     }
 }
 
-void ClientMeshCtrl::finish() {
+void NPCCtrl::finish() {
     disposeTimeouts();
 }
 
-void ClientMeshCtrl::disposeTimeouts() {
+void NPCCtrl::disposeTimeouts() {
     try {
         for (map<string, ClientCycleTimeout*>::iterator it = timeouts.begin();
                 it != timeouts.end(); ++it) {
@@ -149,7 +149,7 @@ void ClientMeshCtrl::disposeTimeouts() {
     }
 }
 
-void ClientMeshCtrl::dispatchHandler(cMessage *msg) {
+void NPCCtrl::dispatchHandler(cMessage *msg) {
     if (msg->isName(msg::NEIGHBOR_ADD)) {
         handleAddNeighbor(msg);
     } else if (msg->isName(msg::NEIGHBOR_RM)) {
@@ -172,7 +172,7 @@ void ClientMeshCtrl::dispatchHandler(cMessage *msg) {
     }
 }
 
-void ClientMeshCtrl::handleAddNeighbor(cMessage* msg) {
+void NPCCtrl::handleAddNeighbor(cMessage* msg) {
     // for neighbor join during the Mesh init phase
     if (this->LCName.empty()) {
         delete msg;
@@ -216,7 +216,7 @@ void ClientMeshCtrl::handleAddNeighbor(cMessage* msg) {
     delete addNeighbor;
 }
 
-void ClientMeshCtrl::handleRMNeighbor(cMessage* msg) {
+void NPCCtrl::handleRMNeighbor(cMessage* msg) {
     // for neighbor leave during the Mesh init phase
     if (this->LCName.empty()) {
         delete msg;
@@ -238,7 +238,7 @@ void ClientMeshCtrl::handleRMNeighbor(cMessage* msg) {
     delete rmNeighbor;
 }
 
-void ClientMeshCtrl::handleHandShakeReject(cMessage* msg) {
+void NPCCtrl::handleHandShakeReject(cMessage* msg) {
     HandShakeReject* reply = check_and_cast<HandShakeReject*>(msg);
     IPvXAddress srcAddr = check_and_cast<UDPControlInfo *>(
             reply->getControlInfo())->getSrcAddr();
@@ -272,7 +272,7 @@ void ClientMeshCtrl::handleHandShakeReject(cMessage* msg) {
     delete reply;
 }
 
-void ClientMeshCtrl::handleHandShakeTimeout(cMessage* msg) {
+void NPCCtrl::handleHandShakeTimeout(cMessage* msg) {
     HandShakeTimeout* hsTimeout = check_and_cast<HandShakeTimeout*>(msg);
     string LCName = hsTimeout->getLCName();
     // init join
@@ -300,7 +300,7 @@ void ClientMeshCtrl::handleHandShakeTimeout(cMessage* msg) {
     delete hsTimeout;
 }
 
-void ClientMeshCtrl::handleJoin(cMessage* msg) {
+void NPCCtrl::handleJoin(cMessage* msg) {
     Join* join = check_and_cast<Join*>(msg);
     string LCName = join->getLCName();
     if (starts.count(LCName) > 0 && starts[LCName] < 0) {
@@ -336,7 +336,7 @@ void ClientMeshCtrl::handleJoin(cMessage* msg) {
     delete join;
 }
 
-void ClientMeshCtrl::handleCycleEvent(cMessage* msg) {
+void NPCCtrl::handleCycleEvent(cMessage* msg) {
     ClientCycleTimeout* cycleTimeout = check_and_cast<ClientCycleTimeout*>(msg);
     string LCName = cycleTimeout->getLCName();
 
@@ -387,7 +387,7 @@ void ClientMeshCtrl::handleCycleEvent(cMessage* msg) {
     }
 }
 
-string ClientMeshCtrl::getPlayerPosition() {
+string NPCCtrl::getPlayerPosition() {
 
     NPC* npc = m_env.getNPC();
     v3f pf = npc->getPosition();
@@ -417,7 +417,7 @@ string ClientMeshCtrl::getPlayerPosition() {
     return event;
 }
 
-void ClientMeshCtrl::updatePlayerPosition(cMessage* msg) {
+void NPCCtrl::updatePlayerPosition(cMessage* msg) {
 
     NPC* npc = m_env.getNPC();
     v3f pf = npc->getPosition();
@@ -430,10 +430,10 @@ void ClientMeshCtrl::updatePlayerPosition(cMessage* msg) {
     // update simulation first
     m_env.step(cycle.dbl());
 
-    cout << fullName << " updatePlayerPosition: " << npc->getPosition().X << ", "
-            << npc->getPosition().Z << endl;
+//    cout << fullName << " updatePlayerPosition: " << npc->getPosition().X << ", "
+//            << npc->getPosition().Z << endl;
 
-    // update coordinator record and map position
+// update coordinator record and map position
     Coordinate ps((long) position.X / 100, (long) position.Z / 100);
     Coordinate c = CoordinatorAccess().get()->mapLocation(ps);
     displayPosition(c.x, c.y);
@@ -443,15 +443,15 @@ void ClientMeshCtrl::updatePlayerPosition(cMessage* msg) {
     scheduleAt(simTime() + cycle, updatePosition);
 }
 
-void ClientMeshCtrl::displayPosition(long x, long y) {
+void NPCCtrl::displayPosition(long x, long y) {
 
-    cout << fullName << " displayPosition: " << x << ", " << y << endl;
+//    cout << fullName << " displayPosition: " << x << ", " << y << endl;
 
     getParentModule()->getDisplayString().setTagArg("p", 0, x);
     getParentModule()->getDisplayString().setTagArg("p", 1, y);
 }
 
-void ClientMeshCtrl::handleConfigUpdate(cMessage* msg) {
+void NPCCtrl::handleConfigUpdate(cMessage* msg) {
 
     ConfigUpdate* update = check_and_cast<ConfigUpdate*>(msg);
     std::string LCName = update->getLCName();

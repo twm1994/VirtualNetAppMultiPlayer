@@ -18,7 +18,7 @@ package ctrl;
 //
 // TODO auto-generated module
 //
-simple ClientMeshCtrl
+simple NPCCtrl
 {
     parameters:
         @display("i=block/broadcast");

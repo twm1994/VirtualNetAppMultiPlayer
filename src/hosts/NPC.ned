@@ -21,7 +21,7 @@ import ctrl.*;
 //
 // TODO auto-generated module
 //
-module ClientMesh
+module NPC
 {
     parameters:
         @display("i=customized/mesh_round");
@@ -29,7 +29,7 @@ module ClientMesh
         inout udpgate @directIn;
         inout tcpgate @directIn;
     submodules:
-        ctrl: ClientMeshCtrl {
+        ctrl: NPCCtrl {
             parameters:
                 @display("p=176,80");
         }
@@ -49,5 +49,5 @@ module ClientMesh
         udpgate$i --> udp.downlink$i;
         udpgate$o <-- udp.downlink$o;
         tcpgate$i --> tcp.downlink$i;
-        tcpgate$o <-- tcp.downlink$o;        
+        tcpgate$o <-- tcp.downlink$o;
 }

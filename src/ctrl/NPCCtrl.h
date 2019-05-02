@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __VIRTUALNETAPP_CLIENTMESHCTRL_H_
-#define __VIRTUALNETAPP_CLIENTMESHCTRL_H_
+#ifndef __VIRTUALNETAPP_NPCCtrl_H_
+#define __VIRTUALNETAPP_NPCCtrl_H_
 
 #include <omnetpp.h>
 #include "../server/environment.h"
@@ -45,7 +45,7 @@ using namespace omnetpp;
 /**
  * TODO - Generated class
  */
-class ClientMeshCtrl: public HostBase {
+class NPCCtrl: public HostBase {
 private:
     unsigned long id;
     unsigned short peerId;
@@ -98,8 +98,8 @@ protected:
     virtual void dispatchHandler(cMessage *msg);
     virtual void finish();
 public:
-    ClientMeshCtrl();
-    virtual ~ClientMeshCtrl();
+    NPCCtrl();
+    virtual ~NPCCtrl();
 };
 
 #endif
