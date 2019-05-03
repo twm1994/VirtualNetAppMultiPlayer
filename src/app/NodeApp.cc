@@ -102,6 +102,8 @@ void NodeApp::dispatchHandler(cMessage *msg) {
 
 void NodeApp::initApp(unsigned short peerId) {
     this->peer_id = peerId;
+    this->reqId = util::getSHA1(std::to_string(peer_id),
+            GlobalParametersAccess().get()->getAddrSpaceSize());
 }
 
 void NodeApp::persistAppState() {

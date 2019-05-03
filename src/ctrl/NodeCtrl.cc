@@ -240,7 +240,12 @@ void NodeCtrl::dispatchHandler(cMessage *msg) {
     } else if (msg->isName(msg::TERMINATION)) {
         toExit = true;
         if (is_hbto) {
-            UnderlayConfiguratorAccess().get()->revokeNode(ipAddress);
+
+            cout << "heartbeat timeout, start to revoke the node" << endl;
+
+            UnderlayConfiguratorAccess().get()->revokeNode(ipAddress, true);
+
+            delete msg;
         } else {
             sendReliable(msg);
         }
@@ -333,6 +338,9 @@ void NodeCtrl::handleHeartbeatTimeout(HBTimeout* hbt) {
         receiveClient = false;
         app->onExit();
         is_hbto = true;
+
+        cout << "heartbeat timeout" << endl;
+
     } else {
         if (lastHB != NULL) {
             // set heartbeat timeout
