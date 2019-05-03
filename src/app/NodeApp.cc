@@ -32,10 +32,15 @@ NodeApp::NodeApp() :
     initialized = false;
     init_empty = false;
     init_start = false;
+    terminating = false;
+
+    persist = NULL;
 }
 
 NodeApp::~NodeApp() {
-    ;
+    if (persist != NULL) {
+        cancelAndDelete(persist);
+    }
 }
 
 int NodeApp::numInitStages() const {
@@ -77,6 +82,9 @@ void NodeApp::initialize(int stage) {
 
         ctrl = dynamic_cast<NodeCtrl*>(this->getParentModule()->getSubmodule(
                 "ctrl"));
+
+        persist_cycle = par("pesist_cycle");
+        persist = new cMessage(msg::APP_PERSIST);
     }
 }
 
@@ -87,11 +95,46 @@ void NodeApp::dispatchHandler(cMessage *msg) {
     } else if (msg->isName(msg::CHORD_REPLY)) {
         ChordMessage* chordMsg = check_and_cast<ChordMessage*>(msg);
         handleChordMsg(chordMsg);
+    } else if (msg->isName(msg::APP_PERSIST)) {
+        persistAppState();
     }
 }
 
 void NodeApp::initApp(unsigned short peerId) {
     this->peer_id = peerId;
+}
+
+void NodeApp::persistAppState() {
+    // store state to the P2P cloud
+    ChordInfo* chord = NULL;
+    do {
+        chord = GlobalNodeListAccess().get()->randChord();
+    } while (chord == NULL
+            || !GlobalNodeListAccess().get()->isReady(chord->getChordId()));
+
+    ChordMessage* message = new ChordMessage(msg::CHORD_LOOK_UP);
+    message->setSender(id);
+    message->setHop(0);
+    message->setType(ChordMsgType::CHORD_STORE);
+    message->setKey(reqId);
+    PlayerState ps;
+    ps.peerId = this->peer_id;
+    ps.position = this->position;
+    ps.version = this->version;
+    ps.gear = this->gear;
+    ps.skin = this->skin;
+    std::string serialized = ps.serialize();
+    message->setContent(serialized.c_str());
+    message->setByteLength(serialized.length());
+    message->setLabel(msg::LABEL_CONTENT);
+    IPvXAddress destAddr = GlobalNodeListAccess().get()->getNodeAddr(
+            chord->getChordId());
+    UDPControlInfo* udpControlInfo = new UDPControlInfo();
+    udpControlInfo->setDestAddr(destAddr);
+    message->setControlInfo(udpControlInfo);
+    send(message, gateHalf("link", cGate::OUTPUT));
+
+    scheduleAt(simTime() + persist_cycle, persist);
 }
 
 void NodeApp::handleChordMsg(ChordMessage* chordMsg) {
@@ -113,16 +156,18 @@ void NodeApp::handleChordMsg(ChordMessage* chordMsg) {
         initClientState();
 
     } else if (type == ChordMsgType::CHORD_STORE_REPLY) {
-        toExit = true;
-        IPvXAddress rendezvous = loadIPAddress(
-                getParentModule()->par("RendezvousInterface"),
-                getParentModule());
-        cMessage* msg = new cMessage(msg::TERMINATION);
-        UDPControlInfo* udpControlInfo = new UDPControlInfo();
-        udpControlInfo->setDestAddr(rendezvous);
-        udpControlInfo->setSrcAddr(ipAddress);
-        msg->setControlInfo(udpControlInfo);
-        send(msg, gateHalf("link", cGate::OUTPUT));
+        if (terminating) {
+            toExit = true;
+            IPvXAddress rendezvous = loadIPAddress(
+                    getParentModule()->par("RendezvousInterface"),
+                    getParentModule());
+            cMessage* msg = new cMessage(msg::TERMINATION);
+            UDPControlInfo* udpControlInfo = new UDPControlInfo();
+            udpControlInfo->setDestAddr(rendezvous);
+            udpControlInfo->setSrcAddr(ipAddress);
+            msg->setControlInfo(udpControlInfo);
+            send(msg, gateHalf("link", cGate::OUTPUT));
+        }
     }
 
     delete chordMsg;
@@ -186,6 +231,9 @@ void NodeApp::initClientState() {
 
         // apply the rest events
         applyEvent();
+
+        // start to cyclically persist application state
+        scheduleAt(simTime() + persist_cycle, persist);
     }
 }
 
@@ -509,7 +557,7 @@ std::string NodeApp::processData(u8 *data, u32 datasize, u16 peerId,
             if (player == NULL) {
 //                std::cout << "Server::ProcessData(): Adding player " << peerId
 //                        << std::endl;
-                player = new Player(false);
+                player = new Player(peerId == this->peer_id ? true : false);
                 player->peer_id = peerId;
                 m_env.addPlayer(player);
             }
@@ -622,6 +670,8 @@ std::string NodeApp::processData(u8 *data, u32 datasize, u16 peerId,
 void NodeApp::onExit() {
 
     Enter_Method_Silent("On node exit");
+
+    terminating = true;
 
 // store state to the P2P cloud
     ChordInfo* chord = NULL;

@@ -78,7 +78,11 @@ private:
     bool initialized;
     bool init_empty;
     bool init_start;
+    bool terminating;
 
+    // cycle to persist app state
+    cMessage* persist;
+    simtime_t persist_cycle;
     NodeCtrl* ctrl;
 
     // first client event is expected to approach after the (configured) duration of client initialization
@@ -90,6 +94,7 @@ private:
     std::string removeNeighbor(u16 peerId, std::string clinetId);
 
     // handle the message from the P2P cloud
+    void persistAppState();
     void handleChordMsg(ChordMessage* chordMsg);
 
 protected:

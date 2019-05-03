@@ -131,6 +131,7 @@ extern const char* CLIENT_INIT;
 extern const char* NPC_INIT;
 extern const char* NPC_UPDATE_POS;
 extern const char* NEIGHBOR_DISCOVERY;
+extern const char* APP_PERSIST;
 //extern const char* STEP_APP;
 
 // messages between hosts and Rendezvous

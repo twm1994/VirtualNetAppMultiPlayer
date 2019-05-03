@@ -22,6 +22,7 @@ simple NodeApp
 {
     parameters:
         @display("i=block/app");
+        double pesist_cycle @unit(s);
     gates:
         inout link;
 }

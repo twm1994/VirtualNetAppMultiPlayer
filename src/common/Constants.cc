@@ -115,6 +115,7 @@ const char* msg::CLIENT_INIT = "CLIENT_INIT";
 const char* msg::NPC_INIT = "NPC_INIT";
 const char* msg::NPC_UPDATE_POS = "NPC_UPDATE_POS";
 const char* msg::NEIGHBOR_DISCOVERY = "NEIGHBOR_DISCOVERY";
+const char* msg::APP_PERSIST = "APP_PERSIST";
 //const char* msg::STEP_APP = "STEP_APP";
 
 // messages between hosts and Rendezvous
