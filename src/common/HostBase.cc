@@ -33,6 +33,7 @@ void HostBase::initialize() {
     WATCH(ipAddress);
     WATCH(moduleId);
     WATCH(clockError);
+    WATCH(toExit);
 }
 
 void HostBase::initialize(int stage) {

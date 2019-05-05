@@ -48,14 +48,14 @@ network VirtualNet
         ContentStorage: ChordOverlay {
             @display("p=400,50;t=Peer-to-peer Cloud Service");
         }
-        //        churnGenerator: UniformChurnGenerator {
-        //            @display("p=100,500;t=Churn Generator");
-        //        }
+        churnGenerator: UniformChurnGenerator {
+            @display("p=100,500;t=Churn Generator");
+        }
         //        churnGenerator: WeibullChurnGenerator {
         //            @display("p=100,500;t=Churn Generator");
         //        }
-        churnGenerator: ManualChurnGenerator {
-            @display("p=100,500;t=Churn Generator");
-        }
+    //        churnGenerator: ManualChurnGenerator {
+    //            @display("p=100,500;t=Churn Generator");
+    //        }
     connections allowunconnected:
 }

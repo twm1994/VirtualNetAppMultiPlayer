@@ -113,6 +113,7 @@ void NodeCtrl::initialize(int stage) {
         WATCH(clientId);
         WATCH(is_hbto);
         WATCH(is_ccto);
+        WATCH(receiveClient);
     }
 
     if (stage == 1) {

@@ -20,6 +20,7 @@ Define_Module(Rendezvous);
 Rendezvous::Rendezvous() {
     hostCreated = 0;
     STAGE_NUM = stage::RENDEZVOUS_INIT;
+    toMonitor = true;
 }
 
 Rendezvous::~Rendezvous() {
@@ -74,6 +75,10 @@ void Rendezvous::handleTermination(cMessage* msg) {
             msg->getControlInfo());
     IPvXAddress& srcAddr = msgCtrl->getSrcAddr();
     toTerminates.insert(srcAddr);
+    if (survivals.count(srcAddr)) {
+        // Enter the termination stage and new host creation will be blocked
+        toMonitor = false;
+    }
 
     // check whether the termination signal has been received from all live replies
     bool allReceived = true;
@@ -93,7 +98,6 @@ void Rendezvous::handleTermination(cMessage* msg) {
         cout << "Terminate the Logical Computer" << endl;
 
         for (auto elem : survivals) {
-//            configurator->removeNode(elem);
             configurator->revokeNode(elem);
         }
         configurator->revokeLogicComputer(ipAddress);
@@ -175,39 +179,55 @@ void Rendezvous::handleTimeout(HBTimeout* hbt) {
 
         string hostAddr = hbt->getHostAddr();
         TimeoutScheduler* timer = timeouts[host];
-        cout << "[" << simTime() << "s] " << "Rendezvous remove event host: "
+        cout << "[" << simTime() << "s] " << "Rendezvous remove host: "
                 << timer->event->getHostName() << endl;
-
-        if (hasGUI()) {
-            string msg = "Remove " + host + " from group";
-            bubble(msg.c_str());
-        }
 
         IPvXAddress addr(hostAddr.c_str());
         survivals.erase(addr);
         routingTable.erase(addr);
         timeouts.erase(host);
 
-        // add new hosts if the current number of hosts is lower than the threshold
-        // get the logical computer module
-        //        int threshold =
-        //                ReplicaNumPolicyAccess().get(this->getParentModule())->getThreshold();
-        int groupSize =
-                ReplicaNumPolicyAccess().get(this->getParentModule())->maxReplicNumber();
-        int size = survivals.size();
-        //        if (size < threshold) {
-        // if, in a small chance, all replica has been failed, re-initialized the entire replica group
-        bool init = (size == 0 ? true : false);
-        this->addNodes(groupSize - size, init);
-        //        }
+        // add new hosts
+        if (toMonitor) {
+            int groupSize = ReplicaNumPolicyAccess().get(
+                    this->getParentModule())->maxReplicNumber();
+            int size = survivals.size();
+            bool init = (size == 0 ? true : false);
+            this->addNodes(groupSize - size, init);
+        } else {
+            // check whether the termination signal has been received from all live replies
+            bool allReceived = true;
+            for (set<IPvXAddress>::iterator it = survivals.begin();
+                    it != survivals.end(); ++it) {
+                IPvXAddress host = *it;
+                if (toTerminates.find(host) == toTerminates.end()) {
+                    allReceived = false;
+                    break;
+                }
+            }
+
+            cout << "Termination received" << endl;
+
+            if (allReceived) {
+
+                cout << "Terminate the Logical Computer" << endl;
+
+                for (auto elem : survivals) {
+                    configurator->revokeNode(elem);
+                }
+                configurator->revokeLogicComputer(ipAddress);
+                toExit = true;
+            }
+        }
 
         if (timer->hbr != NULL) {
             delete timer->hbr;
         }
         cancelAndDelete(timer->event);
+        delete timer;
 
     } else {
-        if (timeouts.find(host) != timeouts.end()) {
+        if (timeouts.find(host) != timeouts.end() && toMonitor) {
             TimeoutScheduler* timer = timeouts[host];
             timer->timeout = simTime() + cycle;
 

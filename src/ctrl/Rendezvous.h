@@ -61,6 +61,7 @@ private:
 
     // application termination
     set<IPvXAddress> toTerminates;
+    bool toMonitor;
 
     void handleClientConnect(Connect* msg);
     void handleHeartbeatResp(HBResponse* hbr);
