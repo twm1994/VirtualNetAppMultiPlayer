@@ -40,10 +40,10 @@ network VirtualNet
             @display("p=100,50;t=Observer");
         }
         underlayConfigurator: UnderlayConfigurator {
-            @display("p=100,200;t=Network Configurator");
+            @display("p=100,200;t=Node Pool");
         }
         coordinator: Coordinator {
-            @display("p=100,350;t=Virutal Coordinator");
+            @display("p=100,350;t=Location Service");
         }
         ContentStorage: ChordOverlay {
             @display("p=400,50;t=Peer-to-peer Cloud Service");
