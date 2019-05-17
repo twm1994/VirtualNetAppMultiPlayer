@@ -1,0 +1,5 @@
+baseURL = "https://sunniel.github.io/VirtualNetAppMultiPlayer/"
+languageCode = "en-us"
+title = "My New Hugo Site"
+theme = "ananke"
+publishDir = "docs"
