@@ -38,24 +38,15 @@ JMutex::JMutex()
 JMutex::~JMutex()
 {
 	if (initialized)
-#ifdef JTHREAD_CONFIG_JMUTEXCRITICALSECTION
-		DeleteCriticalSection(&mutex);
-#else
-		CloseHandle(mutex);
-#endif // JTHREAD_CONFIG_JMUTEXCRITICALSECTION
+		pthread_mutex_destroy(&mutex);
 }
 
 int JMutex::Init()
 {
 	if (initialized)
 		return ERR_JMUTEX_ALREADYINIT;
-#ifdef JTHREAD_CONFIG_JMUTEXCRITICALSECTION
-	InitializeCriticalSection(&mutex);
-#else
-	mutex = CreateMutex(NULL,FALSE,NULL);
-	if (mutex == NULL)
-		return ERR_JMUTEX_CANTCREATEMUTEX;
-#endif // JTHREAD_CONFIG_JMUTEXCRITICALSECTION
+
+	pthread_mutex_init(&mutex,NULL);
 	initialized = true;
 	return 0;
 }
@@ -64,11 +55,8 @@ int JMutex::Lock()
 {
 	if (!initialized)
 		return ERR_JMUTEX_NOTINIT;
-#ifdef JTHREAD_CONFIG_JMUTEXCRITICALSECTION
-	EnterCriticalSection(&mutex);
-#else
-	WaitForSingleObject(mutex,INFINITE);
-#endif // JTHREAD_CONFIG_JMUTEXCRITICALSECTION
+
+	pthread_mutex_lock(&mutex);
 	return 0;
 }
 
@@ -76,11 +64,8 @@ int JMutex::Unlock()
 {
 	if (!initialized)
 		return ERR_JMUTEX_NOTINIT;
-#ifdef JTHREAD_CONFIG_JMUTEXCRITICALSECTION
-	LeaveCriticalSection(&mutex);
-#else
-	ReleaseMutex(mutex);
-#endif // JTHREAD_CONFIG_JMUTEXCRITICALSECTION
+
+	pthread_mutex_unlock(&mutex);
 	return 0;
 }
 

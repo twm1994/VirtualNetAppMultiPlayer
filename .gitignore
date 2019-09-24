@@ -1,4 +1,6 @@
 backup
+*anf
+*dbg
 out
 simulations/results
 simulations/*.txt

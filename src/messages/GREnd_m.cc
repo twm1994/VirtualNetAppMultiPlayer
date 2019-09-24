@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.4 from messages/GREnd.msg.
+// Generated file, do not edit! Created by nedtool 5.5 from messages/GREnd.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:

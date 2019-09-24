@@ -47,4 +47,3 @@ private:
 } // end namespace
 
 #endif // JTHREAD_JMUTEXAUTOLOCK_H
-

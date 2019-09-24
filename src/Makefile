@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for VirtualNetAppMultiPlayer
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -IC:/Workspaces/OMNeT++/omnetpp-5.4/include/omnetpp -IC:/Workspaces/boost_1_66_0 -IC:/Workspaces/irrlicht-1.8.4/include -lgdi32 -lWS2_32
+#  opp_makemake -f --deep -I/home/twm/json-develop -I/home/twm/boost_1_71_0 -I/home/twm/omnetpp-5.5.1/include/omnetpp -I/usr/include/irrlicht -lpthread
 #
 
 # Name of target to be created (-o option)
@@ -16,13 +16,13 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(QTENV_LIBS) $(CMDENV_LI
 #USERIF_LIBS = $(QTENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = -IC:/Workspaces/OMNeT++/omnetpp-5.4/include/omnetpp -IC:/Workspaces/boost_1_66_0 -IC:/Workspaces/irrlicht-1.8.4/include
+INCLUDE_PATH = -I/home/twm/json-develop -I/home/twm/boost_1_71_0 -I/home/twm/omnetpp-5.5.1/include/omnetpp -I/usr/include/irrlicht
 
 # Additional object and library files to link with
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS =  -lgdi32 -lWS2_32
+LIBS =  -lpthread
 
 # Output directory
 PROJECT_OUTPUT_DIR = ../out
@@ -241,7 +241,7 @@ endif
 $O/$(TARGET): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile $(CONFIGFILE)
 	@$(MKPATH) $O
 	@echo Creating executable: $@
-	$(Q)echo >.tmp$$$$ $(OBJS) $(EXTRA_OBJS) && $(AR) .tmplib$$$$ @.tmp$$$$ && $(CXX) -o $O/$(TARGET) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) .tmplib$$$$ $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS) $(LDFLAGS) && rm .tmp$$$$ && rm .tmplib$$$$
+	$(Q)$(CXX) $(LDFLAGS) -o $O/$(TARGET) $(OBJS) $(EXTRA_OBJS) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS)
 
 .PHONY: all clean cleanall depend msgheaders smheaders
 
@@ -254,7 +254,7 @@ $O/%.o: %.cc $(COPTS_FILE) | msgheaders smheaders
 
 %_m.cc %_m.h: %.msg
 	$(qecho) MSGC: $<
-	$(Q)$(MSGC) -s _m.cc -MD -MP -MF $O/$(basename $@).d $(MSGCOPTS) $?
+	$(Q)$(MSGC) -s _m.cc -MD -MP -MF $O/$(basename $<)_m.h.d $(MSGCOPTS) $?
 
 %_sm.cc %_sm.h: %.sm
 	$(qecho) SMC: $<
@@ -277,4 +277,4 @@ cleanall:
 	$(Q)-rm -rf $(PROJECT_OUTPUT_DIR)
 
 # include all dependencies
--include $(OBJS:%.o=%.d)
+-include $(OBJS:%=%.d) $(MSGFILES:%.msg=$O/%_m.h.d)

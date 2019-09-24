@@ -26,11 +26,9 @@
 */
 
 #include "jthread.h"
-#include "jmutexautolock.h"
-
-#ifndef _WIN32_WCE
-	#include <process.h>
-#endif // _WIN32_WCE
+#include <sys/time.h>
+#include <time.h>
+#include <stdlib.h>
 
 namespace jthread
 {
@@ -41,7 +39,6 @@ JThread::JThread()
 	mutexinit = false;
 	running = false;
 	threadid = 0;
-	threadhandle = 0;
 }
 
 JThread::~JThread()
@@ -51,6 +48,8 @@ JThread::~JThread()
 
 int JThread::Start()
 {
+	int status;
+
 	if (!mutexinit)
 	{
 		if (!runningmutex.IsInitialized())
@@ -67,7 +66,8 @@ int JThread::Start()
 		{
 			if (continuemutex2.Init() < 0)
 				return ERR_JTHREAD_CANTINITMUTEX;
-		}		mutexinit = true;
+		}
+		mutexinit = true;
 	}
 	
 	continuemutex.Lock();
@@ -80,12 +80,13 @@ int JThread::Start()
 	}
 	runningmutex.Unlock();
 	
-#ifndef _WIN32_WCE
-	threadhandle = (HANDLE)_beginthreadex(NULL,0,TheThread,this,0,&threadid);
-#else
-	threadhandle = CreateThread(NULL,0,TheThread,this,0,&threadid);
-#endif // _WIN32_WCE
-	if (threadhandle == NULL)
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
+
+	status = pthread_create(&threadid,&attr,TheThread,this);
+	pthread_attr_destroy(&attr);
+	if (status != 0)
 	{
 		continuemutex.Unlock();
 		return ERR_JTHREAD_CANTSTARTTHREAD;
@@ -97,7 +98,13 @@ int JThread::Start()
 	while (!running)
 	{
 		runningmutex.Unlock();
-		Sleep(1);
+
+		struct timespec req,rem;
+
+		req.tv_sec = 0;
+		req.tv_nsec = 1000000;
+		nanosleep(&req,&rem);
+
 		runningmutex.Lock();
 	}
 	runningmutex.Unlock();
@@ -106,7 +113,6 @@ int JThread::Start()
 	
 	continuemutex2.Lock();
 	continuemutex2.Unlock();
-		
 	return 0;
 }
 
@@ -120,10 +126,11 @@ int JThread::Kill()
 		continuemutex.Unlock();
 		return ERR_JTHREAD_NOTRUNNING;
 	}
-	TerminateThread(threadhandle,0);
-	CloseHandle(threadhandle);
-	threadhandle = 0;
+#ifndef JTHREAD_SKIP_PTHREAD_CANCEL
+	pthread_cancel(threadid);
+#endif // JTHREAD_SKIP_PTHREAD_CANCEL
 	running = false;
+	threadid = 0;
 	runningmutex.Unlock();
 	continuemutex.Unlock();
 	return 0;
@@ -141,13 +148,14 @@ bool JThread::IsRunning()
 
 void *JThread::GetReturnValue()
 {
-	JMutexAutoLock autolock(runningmutex);
 	void *val;
 	
+	runningmutex.Lock();
 	if (running)
 		val = NULL;
 	else
 		val = retval;
+	runningmutex.Unlock();
 	return val;
 }
 
@@ -159,7 +167,7 @@ bool JThread::IsSameThread()
 	runningmutex.Lock();			
 	if (running)
 	{
-		if (GetCurrentThreadId() == threadid)
+		if (pthread_equal(pthread_self(), threadid))
 			same = true;
 	}
 
@@ -169,11 +177,7 @@ bool JThread::IsSameThread()
 	return same;
 }
 
-#ifndef _WIN32_WCE
-UINT __stdcall JThread::TheThread(void *param)
-#else
-DWORD WINAPI JThread::TheThread(void *param)
-#endif // _WIN32_WCE
+void *JThread::TheThread(void *param)
 {
 	JThread *jthread;
 	void *ret;
@@ -189,14 +193,14 @@ DWORD WINAPI JThread::TheThread(void *param)
 	jthread->continuemutex.Unlock();
 	
 	ret = jthread->Thread();
-	
+
 	jthread->runningmutex.Lock();
 	jthread->running = false;
 	jthread->retval = ret;
-	CloseHandle(jthread->threadhandle);
-	jthread->threadhandle = 0;
+	jthread->threadid = 0;
 	jthread->runningmutex.Unlock();
-	return 0;		
+
+	return NULL;
 }
 
 void JThread::ThreadStarted()
@@ -205,4 +209,3 @@ void JThread::ThreadStarted()
 }
 
 } // end namespace
-

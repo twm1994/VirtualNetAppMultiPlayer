@@ -72,4 +72,3 @@ private:
 } // end namespace
 
 #endif // JTHREAD_JMUTEX_H
-

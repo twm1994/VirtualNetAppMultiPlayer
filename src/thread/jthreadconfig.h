@@ -37,9 +37,8 @@
 	#define JTHREAD_IMPORTEXPORT JTHREAD_IMPORT
 #endif // JTHREAD_COMPILING
 
-#define JTHREAD_CONFIG_WIN32THREADS
+// Using pthread based threads
 
-// Using standard Win32 mutex
+
 
 #endif // JTHREADCONFIG_H
-

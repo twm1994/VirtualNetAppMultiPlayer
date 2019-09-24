@@ -4,11 +4,11 @@ environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/LC_ALL/operation
 environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/LC_ALL/value=en_US.UTF-8
 environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/PATH/delimiter=;
 environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/PATH/operation=replace
-environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/PATH/value=C\:\\Workspaces\\OMNeT++\\omnetpp-5.4\\bin;C\:\\Workspaces\\OMNeT++\\omnetpp-5.4\\tools\\win64\\mingw64\\bin;C\:\\Workspaces\\OMNeT++\\omnetpp-5.4\\tools\\win64\\usr\\bin;C\:/Workspaces/OMNeT++/omnetpp-5.4/ide/jre/bin/server;C\:/Workspaces/OMNeT++/omnetpp-5.4/ide/jre/bin;C\:/Workspaces/OMNeT++/omnetpp-5.4/ide/jre/lib/amd64;C\:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C\:\\Python27\\;C\:\\Python27\\Scripts;C\:\\ProgramData\\Oracle\\Java\\javapath;C\:\\Windows\\system32;C\:\\Windows;
+environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/PATH/value=/home/twm/omnetpp-5.5.1/bin\://home/twm/texlive/2019/bin/x86_64-linux\:/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/usr/games\:/usr/local/games\:/snap/bin
 environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/append=true
 environment/project/org.omnetpp.cdt.gnu.config.debug.1089529534/appendContributed=true
 environment/project/org.omnetpp.cdt.gnu.config.release.1328273991/PATH/delimiter=;
 environment/project/org.omnetpp.cdt.gnu.config.release.1328273991/PATH/operation=replace
-environment/project/org.omnetpp.cdt.gnu.config.release.1328273991/PATH/value=C\:\\Workspaces\\OMNeT++\\omnetpp-5.4\\bin;C\:\\Workspaces\\OMNeT++\\omnetpp-5.4\\tools\\win64\\mingw64\\bin;C\:\\Workspaces\\OMNeT++\\omnetpp-5.4\\tools\\win64\\usr\\bin;C\:/Workspaces/OMNeT++/omnetpp-5.4/ide/jre/bin/server;C\:/Workspaces/OMNeT++/omnetpp-5.4/ide/jre/bin;C\:/Workspaces/OMNeT++/omnetpp-5.4/ide/jre/lib/amd64;C\:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C\:\\Python27\\;C\:\\Python27\\Scripts;C\:\\ProgramData\\Oracle\\Java\\javapath;C\:\\Windows\\system32;C\:\\Windows;
+environment/project/org.omnetpp.cdt.gnu.config.release.1328273991/PATH/value=/home/twm/omnetpp-5.5.1/bin\://home/twm/texlive/2019/bin/x86_64-linux\:/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/usr/games\:/usr/local/games\:/snap/bin
 environment/project/org.omnetpp.cdt.gnu.config.release.1328273991/append=true
 environment/project/org.omnetpp.cdt.gnu.config.release.1328273991/appendContributed=true

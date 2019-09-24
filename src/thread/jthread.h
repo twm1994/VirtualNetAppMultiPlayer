@@ -81,4 +81,3 @@ private:
 } // end namespace
 
 #endif // JTHREAD_JTHREAD_H
-
